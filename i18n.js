@@ -5,12 +5,12 @@
     "nav.home": { en: "home", de: "start" },
     "nav.uc": { en: "use cases", de: "anwendungsfälle" },
     "nav.es": { en: "engagement studio", de: "engagement studio" },
+    "nav.workboard": { en: "workboard", de: "workboard" },
     "nav.hiw": { en: "how it works", de: "so funktioniert's" },
-    "nav.install": { en: "install", de: "installation" },
+    "nav.install": { en: "download", de: "download" },
     "nav.about": { en: "about", de: "über" },
     "foot.tag": { en: "pardot &amp; salesforce audit suite · Nadya Higazi", de: "pardot- &amp; salesforce-audit-suite · Nadya Higazi" },
     "common.what": { en: "what parAdots does", de: "was parAdots macht" },
-    "btn.copy": { en: "copy", de: "kopieren" },
 
     // ---- home ----
     "home.eyebrow": { en: "pardot &amp; salesforce audit suite · multi-org", de: "pardot- &amp; salesforce-audit-suite · multi-org" },
@@ -156,6 +156,29 @@
     "ab.ct_h": { en: "Let's talk Pardot, Salesforce — or parAdots.", de: "Sprechen wir über Pardot, Salesforce — oder parAdots." },
     "ab.ct_lead": { en: "Whether you want the tool run against your own org or an extra pair of hands on a marketing-automation project, I'm happy to hear from you.", de: "Ob du parAdots an deiner eigenen Org laufen lassen oder zusätzliche Unterstützung für ein Marketing-Automation-Projekt möchtest — ich freue mich über eine Nachricht." },
     "ab.ct_linkedin": { en: "Connect on LinkedIn", de: "Auf LinkedIn vernetzen" },
+
+    // ---- workboard ----
+    "wb.eyebrow": { en: "workboard", de: "workboard" },
+    "wb.h1": { en: "Design the process with your client — right where you discuss it.", de: "Den Prozess mit der Kund:in entwerfen — genau dort, wo ihr darüber sprecht." },
+    "wb.lead": { en: "The Workboard is a canvas for planning a Pardot process together. Drop in the assets that already exist — with their real names, straight from the audit — or sketch new ones you still have to build. Wire the logic, save the board, and open it again whenever you review with the customer.", de: "Das Workboard ist eine Arbeitsfläche, um einen Pardot-Prozess gemeinsam zu planen. Zieh bestehende Assets hinein — mit ihren echten Namen, direkt aus dem Audit — oder skizziere neue, die du erst noch bauen musst. Verdrahte die Logik, speichere das Board und öffne es wieder, wann immer ihr mit der Kund:in reviewt." },
+    "wb.cap": { en: "a process on the Workboard — real and planned assets, wired into one logic you can save and revisit", de: "ein Prozess auf dem Workboard — echte und geplante Assets, zu einer Logik verdrahtet, die du speichern und wieder aufrufen kannst" },
+
+    "wb.f_eyebrow": { en: "what it's for", de: "wofür es da ist" },
+    "wb.f_h": { en: "A shared picture before anything is built.", de: "Ein gemeinsames Bild, bevor irgendetwas gebaut wird." },
+    "wb.f_lead": { en: "Pardot processes are hard to talk through in the abstract. The Workboard turns that conversation into something you and the client can see, change and agree on — then keep as the reference while it gets built.", de: "Pardot-Prozesse lassen sich abstrakt nur schwer besprechen. Das Workboard macht aus diesem Gespräch etwas, das du und die Kund:in sehen, ändern und gemeinsam festlegen könnt — und das als Referenz bleibt, während es gebaut wird." },
+    "wb.f1_h": { en: "Real or planned assets", de: "Echte oder geplante Assets" },
+    "wb.f1_p": { en: "Add existing Pardot assets with their correct names, pulled from the audit — or add new, planned components specified by type, for the pieces that don't exist yet.", de: "Füge bestehende Pardot-Assets mit ihren korrekten Namen aus dem Audit hinzu — oder lege neue, geplante Komponenten nach Typ an, für die Teile, die es noch nicht gibt." },
+    "wb.f2_h": { en: "Build the logic", de: "Die Logik bauen" },
+    "wb.f2_p": { en: "Connect the cards with decisions, waits, branches and stops — the whole flow, laid out the way you'd actually explain it at the table.", de: "Verbinde die Karten mit Entscheidungen, Wartezeiten, Verzweigungen und Stopps — den ganzen Ablauf, so angeordnet, wie du ihn am Tisch tatsächlich erklären würdest." },
+    "wb.f3_h": { en: "Saved &amp; ready to review", de: "Gespeichert &amp; bereit zum Review" },
+    "wb.f3_p": { en: "Every board is saved, so you can come back to it in the next session with the customer — and extend it with notes and screenshots as the plan firms up.", de: "Jedes Board wird gespeichert — du kommst in der nächsten Session mit der Kund:in darauf zurück und erweiterst es mit Notizen und Screenshots, während der Plan konkreter wird." },
+
+    "wb.w_eyebrow": { en: "where it fits", de: "wo es sich einfügt" },
+    "wb.w_h": { en: "Next to the processes it describes.", de: "Direkt neben den Prozessen, die es beschreibt." },
+    "wb.w_lead": { en: "The Workboard lives inside parAdots, alongside the Engagement Studio view and process discovery — so planning happens in the same place you read the real org. Use it to lay out a new flow from scratch, or to reconstruct and verify an Engagement Studio program you want to walk through with the client.", de: "Das Workboard steckt direkt in parAdots, neben der Engagement-Studio-Ansicht und der Prozesserkennung — Planung passiert also am selben Ort, an dem du die echte Org liest. Nutze es, um einen neuen Ablauf von Grund auf zu entwerfen oder ein Engagement-Studio-Programm zu rekonstruieren und zu prüfen, das du mit der Kund:in durchgehen willst." },
+    "wb.w_payoff": { en: "One board the client has seen and agreed to — ready before a single asset is built.", de: "Ein Board, das die Kund:in gesehen und freigegeben hat — fertig, bevor ein einziges Asset gebaut ist." },
+    "wb.w_btn1": { en: "See Engagement Studio", de: "Zum Engagement Studio" },
+    "wb.w_btn2": { en: "Get in touch", de: "Kontakt" },
 
     // ---- install ----
     "ins.eyebrow": { en: "installation", de: "installation" },
