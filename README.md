@@ -7,13 +7,18 @@ funktioniert mit relativen Pfaden — ideal für GitHub Pages.
 
 ```
 index.html               Startseite (Hero + Übersicht)
+scenarios.html           Anwendungsfälle (Use cases)
+engagement-studio.html   Engagement Studio + Prozesserkennung
+workboard.html           Workboard
 how-it-works.html        Pipeline + Coverage
-scenarios.html           Die drei Szenarien
-engagement-studio.html   Engagement Studio + Process discovery
-request-access.html      Kontakt / Zugang
+install.html             Download, Installation & Lizenz
+about.html               Über mich (Profil)
+i18n.js                  Sprachumschaltung EN/DE
 styles.css               gemeinsames Design (alle Seiten)
-assets/parAdots-logo.svg Logo
+assets/                  Logo und Profilbild
+downloads/               parAdots-oss.zip (Download-Paket)
 shots/                   alle Screenshots
+LICENSE                  MIT-Lizenz
 .nojekyll                liefert die Dateien unverändert aus
 ```
 
