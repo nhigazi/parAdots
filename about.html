@@ -12,34 +12,24 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   /* about page — unified type scale + tighter rhythm */
-  .page-head{padding-block:clamp(26px,3.5vw,40px);}
-  .page-head h1{font-size:1.95rem;line-height:1.15;max-width:30ch;margin:0 0 .35em;}
-  section{padding-block:clamp(28px,3vw,40px);}
-  section h2{font-size:1.45rem;line-height:1.22;margin:0 0 .45em;}
-  .eyebrow{margin-bottom:.85em;}
-  p{margin:0 0 .72em;}
-  .lead{font-size:1.02rem;line-height:1.55;max-width:70ch;margin:0 0 1em;}
-  h3{font-size:1.05rem;}
-
-  .bio-grid{display:grid;grid-template-columns:1.6fr .9fr;gap:clamp(24px,3vw,40px);align-items:start;}
+  .page-head h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.12;max-width:26ch;}
+  .bio-grid{display:grid;grid-template-columns:1.6fr .9fr;gap:clamp(24px,3vw,44px);align-items:start;}
   @media(max-width:820px){.bio-grid{grid-template-columns:1fr;}}
-  .glance{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:20px 22px;position:sticky;top:128px;}
-  .glance dl{margin:0;display:grid;gap:12px;}
-  .glance dt{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:2px;}
-  .glance dd{margin:0;font-size:1.02rem;color:#36405c;}
-  .stats .big{font-size:1.95rem;}
-  .stat{padding:20px 20px;}
-  .stat .cap{font-size:.86rem;margin-top:8px;}
-  .cov-col h3{font-size:1.05rem;}
-  .checks li{font-size:1rem;}
-  .certs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px;}
+  .bio-grid > div p{margin:0 0 1em;color:#36405c;}
+  .bio-grid > div p:last-child{margin-bottom:0;}
+  .glance{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:22px 24px;position:sticky;top:112px;}
+  .glance dl{margin:0;display:grid;gap:16px;}
+  .glance dt{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:3px;}
+  .glance dd{margin:0;font-size:1rem;color:#36405c;line-height:1.4;}
+  .certs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:2em;}
   @media(max-width:760px){.certs{grid-template-columns:1fr 1fr;}}
   @media(max-width:440px){.certs{grid-template-columns:1fr;}}
   .cert{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:16px 18px;}
   .cert .k{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink);}
-  .cert h3{font-size:1.05rem;margin:.45em 0 0;}
-  .btn-row{margin-top:1.2em;}
-  .cta-box{padding:clamp(26px,4vw,44px);}
+  .cert h3{font-size:1.05rem;margin:.45em 0 0;font-family:var(--font-display);}
+  .btn.ghost{background:transparent;color:var(--accent-ink);border:1px solid var(--line-2);}
+  .btn.ghost:hover{border-color:var(--accent);background:var(--surface);}
+  .avatar{display:block;width:104px;height:104px;border-radius:50%;object-fit:cover;margin:0 0 20px;box-shadow:0 0 0 1px var(--line),0 0 0 5px rgba(0,168,143,.12);}
 </style>
 </head>
 <body>
@@ -48,38 +38,39 @@
   <div class="wrap nav">
     <a class="brandmark" href="index.html" aria-label="parAdots home"><img src="assets/parAdots-logo.svg" alt="parAdots"></a>
     <nav class="nav-links">
-      <a href="index.html" class="hide-sm">home</a>
-      <a href="scenarios.html" class="hide-sm">use cases</a>
-      <a href="engagement-studio.html" class="hide-sm">engagement studio</a>
-      <a href="workboard.html" class="hide-sm">workboard</a>
-      <a href="how-it-works.html" class="hide-sm">how it works</a>
-      <a href="about.html" class="active">about</a>
-      <a href="request-access.html" class="nav-cta">request access</a>
+      <a href="index.html" class="hide-sm" data-i18n="nav.home">home</a>
+      <a href="scenarios.html" class="hide-sm" data-i18n="nav.uc">use cases</a>
+      <a href="engagement-studio.html" class="hide-sm" data-i18n="nav.es">engagement studio</a>
+      <a href="how-it-works.html" class="hide-sm" data-i18n="nav.hiw">how it works</a>
+      <a href="install.html" class="hide-sm" data-i18n="nav.install">install</a>
+      <a href="about.html" class="active" data-i18n="nav.about">about</a>
+      <span class="langtoggle" role="group" aria-label="Language"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></span>
     </nav>
   </div>
 </header>
 
 <div class="page-head">
   <div class="wrap">
-    <span class="eyebrow">about</span>
-    <h1>The consultant behind parAdots.</h1>
-    <p class="lead">I'm Nadya Higazi — a Salesforce and Marketing Cloud Account Engagement (Pardot) consultant. parAdots grew out of the day-to-day work of auditing real B2B marketing estates, so it reads the way a practitioner actually thinks about them.</p>
+    <span class="eyebrow" data-i18n="ab.eyebrow">about</span>
+    <h1 data-i18n="ab.h1">The consultant behind parAdots.</h1>
+    <p class="lead" data-i18n="ab.lead">I'm Nadya Higazi — a Salesforce and Marketing Cloud Account Engagement (Pardot) consultant. parAdots grew out of the day-to-day work of auditing real B2B marketing estates, so it reads the way a practitioner actually thinks about them.</p>
   </div>
 </div>
 
 <section>
   <div class="wrap bio-grid">
     <div>
-      <p>I work as a freelance Salesforce &amp; Pardot (MCAE) consultant. Most of my clients are B2B building-products and industrial manufacturers in the DACH region, where marketing and sales rarely run in a straight line — they run through a three-tier distribution model (<em>dreistufiger Vertrieb</em>): manufacturer, wholesale, and trade. A lot of my work is making marketing automation fit that reality rather than fighting it.</p>
-      <p>Before going independent, I spent two decades in international software and project delivery at the Goethe-Institut, latterly as regional project lead (OSKA-Beauftragte) for software rollouts across <strong>9 countries and 17 institutes</strong> in North Africa and the Middle East. Coordinating a rollout at that scale — many sites, many stakeholders, one system that had to work for all of them — is the same muscle I now use on marketing-automation programs.</p>
-      <p>parAdots came directly out of that consulting work. Auditing a Pardot and Salesforce setup by hand is slow, easy to get wrong, and impossible to hand over cleanly. So I built a suite that collects the whole estate, explains every asset in plain language, maps the dependencies, and flags what's broken or non-compliant — the audit I wished I'd had on day one of every new client.</p>
+      <p data-i18n="ab.bio1">I work as a freelance Salesforce &amp; Pardot (MCAE) consultant. Most of my clients are B2B building-products and industrial manufacturers in the DACH region, where marketing and sales rarely run in a straight line — they run through a three-tier distribution model (<em>dreistufiger Vertrieb</em>): manufacturer, wholesale, and trade. A lot of my work is making marketing automation fit that reality rather than fighting it.</p>
+      <p data-i18n="ab.bio2">Before going independent, I spent two decades in international software and project delivery at the Goethe-Institut, latterly as regional project lead (OSKA-Beauftragte) for software rollouts across <strong>9 countries and 17 institutes</strong> in North Africa and the Middle East. Coordinating a rollout at that scale — many sites, many stakeholders, one system that had to work for all of them — is the same muscle I now use on marketing-automation programs.</p>
+      <p data-i18n="ab.bio3">parAdots came directly out of that consulting work. Auditing a Pardot and Salesforce setup by hand is slow, easy to get wrong, and impossible to hand over cleanly. So I built a suite that collects the whole estate, explains every asset in plain language, maps the dependencies, and flags what's broken or non-compliant — the audit I wished I'd had on day one of every new client.</p>
     </div>
     <aside class="glance">
+      <img class="avatar" src="assets/nadya.jpg" alt="Nadya Higazi" width="104" height="104" loading="lazy">
       <dl>
-        <div><dt>Role</dt><dd>Salesforce &amp; MCAE / Pardot consultant</dd></div>
-        <div><dt>Based in</dt><dd>Wiesbaden, Germany</dd></div>
-        <div><dt>Focus</dt><dd>B2B marketing automation for three-tier distribution</dd></div>
-        <div><dt>Languages</dt><dd>German, English (C1), Arabic, French, Dutch, Italian</dd></div>
+        <div><dt data-i18n="ab.g_role_k">Role</dt><dd data-i18n="ab.g_role_v">Salesforce &amp; MCAE / Pardot consultant</dd></div>
+        <div><dt data-i18n="ab.g_based_k">Based in</dt><dd data-i18n="ab.g_based_v">Wiesbaden, Germany</dd></div>
+        <div><dt data-i18n="ab.g_focus_k">Focus</dt><dd data-i18n="ab.g_focus_v">B2B marketing automation for three-tier distribution</dd></div>
+        <div><dt data-i18n="ab.g_lang_k">Languages</dt><dd data-i18n="ab.g_lang_v">German, English (C1), Arabic, French, Dutch, Italian</dd></div>
       </dl>
     </aside>
   </div>
@@ -87,46 +78,46 @@
 
 <section class="band-deep">
   <div class="wrap">
-    <span class="eyebrow">at a glance</span>
-    <div class="stats">
-      <div class="stat"><div class="big">20<span class="u">+</span></div><div class="cap">years in international software &amp; project delivery</div></div>
-      <div class="stat"><div class="big">5</div><div class="cap">Salesforce certifications</div></div>
-      <div class="stat"><div class="big">9</div><div class="cap">countries coordinated on regional rollouts</div></div>
-      <div class="stat"><div class="big">6</div><div class="cap">languages spoken</div></div>
+    <span class="eyebrow" data-i18n="ab.ag_eyebrow">at a glance</span>
+    <div class="stats" style="margin-top:2em">
+      <div class="stat"><div class="big">20<span class="u">+</span></div><div class="cap" data-i18n="ab.ag_s1">years in international software &amp; project delivery</div></div>
+      <div class="stat"><div class="big">5</div><div class="cap" data-i18n="ab.ag_s2">Salesforce certifications</div></div>
+      <div class="stat"><div class="big">9</div><div class="cap" data-i18n="ab.ag_s3">countries coordinated on regional rollouts</div></div>
+      <div class="stat"><div class="big">6</div><div class="cap" data-i18n="ab.ag_s4">languages spoken</div></div>
     </div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <span class="eyebrow">what i do</span>
-    <h2>Marketing automation that survives contact with real orgs.</h2>
-    <p class="lead">Two systems, one job: turn a messy, grown-over setup into something measurable, compliant and handover-ready.</p>
+    <span class="eyebrow" data-i18n="ab.wi_eyebrow">what i do</span>
+    <h2 data-i18n="ab.wi_h">Marketing automation that survives contact with real orgs.</h2>
+    <p class="lead" data-i18n="ab.wi_lead">Two systems, one job: turn a messy, grown-over setup into something measurable, compliant and handover-ready.</p>
     <div class="cov">
-      <div class="cov-col"><h3><span class="tag">pardot</span> account engagement</h3>
+      <div class="cov-col"><h3 data-i18n="ab.wi_pardot_h"><span class="tag">pardot</span> account engagement</h3>
         <div class="tags"><span>Engagement Studio</span><span>Lead Scoring &amp; Grading</span><span>Automation Rules</span><span>Forms &amp; Form Handlers</span><span>Dynamic Content</span><span>Connected Campaigns</span><span>B2B Marketing Analytics</span><span>Double Opt-In / GDPR</span><span>Email Deliverability</span><span>Preference Center</span></div>
       </div>
-      <div class="cov-col"><h3><span class="tag">salesforce</span> platform</h3>
+      <div class="cov-col"><h3 data-i18n="ab.wi_sf_h"><span class="tag">salesforce</span> platform</h3>
         <div class="tags"><span>Administration</span><span>Business Analysis</span><span>Data Model &amp; Sync</span><span>Campaign Attribution</span><span>Three-tier Distribution</span><span>Agentforce</span><span>Reports &amp; Dashboards</span><span>Flows &amp; Automation</span></div>
       </div>
     </div>
-    <h3 style="margin-top:1.6em">Where I'm usually brought in</h3>
+    <h3 style="margin-top:1.8em;font-family:var(--font-display);font-size:1.25rem" data-i18n="ab.wi_where_h">Where I'm usually brought in</h3>
     <ul class="checks">
-      <li>Standing up Pardot &amp; Salesforce for manufacturers new to marketing automation</li>
-      <li>Rescuing and documenting setups nobody fully understands anymore</li>
-      <li>Engagement Studio programs: re-engagement, nurture, DOI / opt-out logic</li>
-      <li>GDPR consent and data-quality audits</li>
-      <li>Connected Campaigns and attribution across marketing and sales</li>
-      <li>Newsletter &amp; email template systems across multiple markets</li>
+      <li data-i18n="ab.wi_l1">Standing up Pardot &amp; Salesforce for manufacturers new to marketing automation</li>
+      <li data-i18n="ab.wi_l2">Rescuing and documenting setups nobody fully understands anymore</li>
+      <li data-i18n="ab.wi_l3">Engagement Studio programs: re-engagement, nurture, DOI / opt-out logic</li>
+      <li data-i18n="ab.wi_l4">GDPR consent and data-quality audits</li>
+      <li data-i18n="ab.wi_l5">Connected Campaigns and attribution across marketing and sales</li>
+      <li data-i18n="ab.wi_l6">Newsletter &amp; email template systems across multiple markets</li>
     </ul>
   </div>
 </section>
 
 <section class="band-deep">
   <div class="wrap">
-    <span class="eyebrow">credentials</span>
-    <h2>Certified across the stack.</h2>
-    <p class="lead">Salesforce certifications spanning platform administration, marketing automation, analysis and AI — plus speaking at the Salesforce community.</p>
+    <span class="eyebrow" data-i18n="ab.cr_eyebrow">credentials</span>
+    <h2 data-i18n="ab.cr_h">Certified across the stack.</h2>
+    <p class="lead" data-i18n="ab.cr_lead">Salesforce certifications spanning platform administration, marketing automation, analysis and AI — plus speaking at the Salesforce community.</p>
     <div class="certs">
       <div class="cert"><div class="k">salesforce</div><h3>Platform Administrator</h3></div>
       <div class="cert"><div class="k">salesforce</div><h3>MCAE Specialist (Pardot)</h3></div>
@@ -141,13 +132,12 @@
 <section>
   <div class="wrap">
     <div class="cta-box">
-      <span class="eyebrow">get in touch</span>
-      <h2>Let's talk Pardot, Salesforce — or parAdots.</h2>
-      <p class="lead">Whether you want the tool run against your own org or an extra pair of hands on a marketing-automation project, I'm happy to hear from you.</p>
+      <span class="eyebrow" data-i18n="ab.ct_eyebrow">get in touch</span>
+      <h2 data-i18n="ab.ct_h">Let's talk Pardot, Salesforce — or parAdots.</h2>
+      <p class="lead" data-i18n="ab.ct_lead">Whether you want the tool run against your own org or an extra pair of hands on a marketing-automation project, I'm happy to hear from you.</p>
       <div class="btn-row">
-        <a class="btn" href="https://www.linkedin.com/in/nadya-higazi" target="_blank" rel="noopener">Connect on LinkedIn</a>
+        <a class="btn" href="https://www.linkedin.com/in/nadya-higazi" target="_blank" rel="noopener" data-i18n="ab.ct_linkedin">Connect on LinkedIn</a>
         <a class="btn ghost" href="mailto:nadya.higazi@gmail.com">nadya.higazi@gmail.com</a>
-        <a class="btn ghost" href="request-access.html">Request parAdots access</a>
       </div>
     </div>
   </div>
@@ -156,9 +146,10 @@
 <footer>
   <div class="wrap foot">
     <span class="wordmark">par<span class="cap">A</span>dots</span>
-    <p>pardot &amp; salesforce audit suite · Nadya Higazi</p>
+    <p data-i18n="foot.tag">pardot &amp; salesforce audit suite · Nadya Higazi</p>
   </div>
 </footer>
 
+<script src="i18n.js"></script>
 </body>
 </html>

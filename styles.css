@@ -153,6 +153,13 @@ figcaption{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.05em;co
 @media(max-width:700px){.plat{grid-template-columns:1fr;}}
 .licensebox{border:1px solid var(--line);border-radius:18px;padding:clamp(28px,5vw,48px);background:radial-gradient(120% 140% at 15% 10%,rgba(0,168,143,.12),transparent 55%),var(--surface);}
 
+/* ---------- about page ---------- */
+.about-name{font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2rem);margin:.1em 0 .1em;}
+.about-role{font-family:var(--font-mono);font-size:.92rem;color:var(--accent-ink);margin:0 0 1.2em;}
+.inlinelinks{margin-top:16px;font-family:var(--font-mono);font-size:.9rem;display:flex;flex-wrap:wrap;gap:8px 20px;}
+.inlinelinks a{color:var(--accent-ink);text-decoration:none;border-bottom:1px solid var(--line-2);padding-bottom:1px;}
+.inlinelinks a:hover{border-color:var(--accent);}
+
 /* ---------- stats ---------- */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
 .stat{border:1px solid var(--line);border-radius:var(--r);padding:26px 22px;background:var(--surface);}
