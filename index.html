@@ -17,13 +17,13 @@
   <div class="wrap nav">
     <a class="brandmark" href="index.html" aria-label="parAdots home"><img src="assets/parAdots-logo.svg" alt="parAdots"></a>
     <nav class="nav-links">
-      <a href="index.html" class="active">home</a>
-      <a href="scenarios.html" class="hide-sm">use cases</a>
-      <a href="engagement-studio.html" class="hide-sm">engagement studio</a>
-      <a href="workboard.html" class="hide-sm">workboard</a>
-      <a href="how-it-works.html" class="hide-sm">how it works</a>
-      <a href="about.html" class="hide-sm">about</a>
-      <a href="request-access.html" class="nav-cta">request access</a>
+      <a href="index.html" class="active" data-i18n="nav.home">home</a>
+      <a href="scenarios.html" class="hide-sm" data-i18n="nav.uc">use cases</a>
+      <a href="engagement-studio.html" class="hide-sm" data-i18n="nav.es">engagement studio</a>
+      <a href="how-it-works.html" class="hide-sm" data-i18n="nav.hiw">how it works</a>
+      <a href="install.html" class="hide-sm" data-i18n="nav.install">install</a>
+      <a href="request-access.html" class="nav-cta" data-i18n="nav.cta">request access</a>
+      <span class="langtoggle" role="group" aria-label="Language"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></span>
     </nav>
   </div>
 </header>
@@ -31,40 +31,40 @@
 <section class="hero">
   <canvas id="dotfield" aria-hidden="true"></canvas>
   <div class="wrap">
-    <span class="eyebrow">pardot &amp; salesforce audit suite · multi-org</span>
-    <h1>know the org before you <span class="mark">touch</span> it.</h1>
-    <p class="lead">parAdots scrapes, maps and scores an entire Pardot and Salesforce setup — every list, automation, form, Engagement&nbsp;Studio program and sync error — and renders it as one navigable picture. What used to take weeks of clicking becomes a single run.</p>
+    <span class="eyebrow" data-i18n="home.eyebrow">pardot &amp; salesforce audit suite · multi-org</span>
+    <h1 data-i18n="home.h1">know the org before you <span class="mark">touch</span> it.</h1>
+    <p class="lead" data-i18n="home.lead">parAdots scrapes, maps and scores an entire Pardot and Salesforce setup — every list, automation, form, Engagement&nbsp;Studio program and sync error — and renders it as one navigable picture. What used to take weeks of clicking becomes a single run.</p>
     <div class="chips">
-      <span class="chip"><b>30+</b> integrated scrapers</span>
-      <span class="chip"><b>14</b> best-practice checks</span>
-      <span class="chip"><b>AI</b> enrichment</span>
-      <span class="chip"><b>multi-org</b> from one codebase</span>
+      <span class="chip" data-i18n="home.chip1"><b>30+</b> integrated scrapers</span>
+      <span class="chip" data-i18n="home.chip2"><b>14</b> best-practice checks</span>
+      <span class="chip" data-i18n="home.chip3"><b>AI</b> enrichment</span>
+      <span class="chip" data-i18n="home.chip4"><b>multi-org</b> from one codebase</span>
     </div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <span class="eyebrow">explore</span>
-    <h2 style="max-width:16ch">Three ways parAdots earns its keep.</h2>
+    <span class="eyebrow" data-i18n="home.exp_eyebrow">explore</span>
+    <h2 style="max-width:16ch" data-i18n="home.exp_h2">Three ways parAdots earns its keep.</h2>
     <div class="cards">
       <a class="card" href="how-it-works.html">
-        <span class="num">01 / pipeline</span>
-        <h3>How it works</h3>
-        <p>Collect → enrich → analyze → visualize. Four layers, one command — and everything it reads across Pardot and Salesforce.</p>
-        <span class="go">how it works →</span>
+        <span class="num" data-i18n="home.card1_num">01 / pipeline</span>
+        <h3 data-i18n="home.card1_h">How it works</h3>
+        <p data-i18n="home.card1_p">Collect → enrich → analyze → visualize. Four layers, one command — and everything it reads across Pardot and Salesforce.</p>
+        <span class="go" data-i18n="home.card1_go">how it works →</span>
       </a>
       <a class="card" href="scenarios.html">
-        <span class="num">02 / use cases</span>
-        <h3>Use cases</h3>
-        <p>Analysing a new org, keeping existing orgs honest, and designing new processes with a client.</p>
-        <span class="go">see the use cases →</span>
+        <span class="num" data-i18n="home.card2_num">02 / use cases</span>
+        <h3 data-i18n="home.card2_h">Use cases</h3>
+        <p data-i18n="home.card2_p">Analysing a new org, keeping existing orgs honest, and designing new processes with a client.</p>
+        <span class="go" data-i18n="home.card2_go">see the use cases →</span>
       </a>
       <a class="card" href="engagement-studio.html">
-        <span class="num">03 / studio</span>
-        <h3>Engagement Studio</h3>
-        <p>Any program rendered as a readable, zoomable, exportable diagram — plus automatic process discovery.</p>
-        <span class="go">open the studio →</span>
+        <span class="num" data-i18n="home.card3_num">03 / studio</span>
+        <h3 data-i18n="home.card3_h">Engagement Studio</h3>
+        <p data-i18n="home.card3_p">Any program rendered as a readable, zoomable, exportable diagram — plus automatic process discovery.</p>
+        <span class="go" data-i18n="home.card3_go">open the studio →</span>
       </a>
     </div>
   </div>
@@ -73,17 +73,17 @@
 <section class="band-deep">
   <div class="wrap" style="display:flex;flex-wrap:wrap;gap:20px 36px;align-items:center;justify-content:space-between">
     <div style="min-width:0">
-      <h2 style="margin:0 0 .2em">See it run against a real org.</h2>
-      <p class="muted" style="margin:0">A walkthrough, a demo audit, or access for a project.</p>
+      <h2 style="margin:0 0 .2em" data-i18n="cta.h2">See it run against a real org.</h2>
+      <p class="muted" style="margin:0" data-i18n="cta.p">A walkthrough, a demo audit, or access for a project.</p>
     </div>
-    <a class="btn" href="request-access.html">Request access</a>
+    <a class="btn" href="request-access.html" data-i18n="cta.btn">Request access</a>
   </div>
 </section>
 
 <footer>
   <div class="wrap foot">
     <span class="wordmark">par<span class="cap">A</span>dots</span>
-    <p>pardot &amp; salesforce audit suite · Nadya Higazi</p>
+    <p data-i18n="foot.tag">pardot &amp; salesforce audit suite · Nadya Higazi</p>
   </div>
 </footer>
 
@@ -99,5 +99,6 @@
   var to;window.addEventListener('resize',function(){clearTimeout(to);to=setTimeout(start,180);});start();
 })();
 </script>
+<script src="i18n.js"></script>
 </body>
 </html>

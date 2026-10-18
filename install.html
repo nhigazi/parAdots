@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>parAdots — Install &amp; license</title>
+<meta name="description" content="Download parAdots, install it in one click or from the command line, and use it freely under the MIT License.">
+<link rel="icon" href="assets/parAdots-logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brandmark" href="index.html" aria-label="parAdots home"><img src="assets/parAdots-logo.svg" alt="parAdots"></a>
+    <nav class="nav-links">
+      <a href="index.html" class="hide-sm" data-i18n="nav.home">home</a>
+      <a href="scenarios.html" class="hide-sm" data-i18n="nav.uc">use cases</a>
+      <a href="engagement-studio.html" class="hide-sm" data-i18n="nav.es">engagement studio</a>
+      <a href="how-it-works.html" class="hide-sm" data-i18n="nav.hiw">how it works</a>
+      <a href="install.html" class="active" data-i18n="nav.install">install</a>
+      <a href="request-access.html" class="nav-cta" data-i18n="nav.cta">request access</a>
+      <span class="langtoggle" role="group" aria-label="Language"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></span>
+    </nav>
+  </div>
+</header>
+
+<div class="page-head">
+  <div class="wrap">
+    <span class="eyebrow" data-i18n="ins.eyebrow">installation</span>
+    <h1 style="font-size:clamp(2rem,5vw,3.2rem);max-width:16ch" data-i18n="ins.h1">Get parAdots running.</h1>
+    <p class="lead" data-i18n="ins.lead">parAdots runs entirely on your own machine — no cloud service, no database to host. You need Python 3.10+ and Google Chrome. The package ships with one-click launchers, so the command line is optional.</p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="dl-card">
+      <span class="eyebrow" data-i18n="ins.dl_eyebrow">download</span>
+      <h2 style="max-width:16ch" data-i18n="ins.dl_h">Download the package</h2>
+      <p class="lead" style="margin-bottom:.6em" data-i18n="ins.dl_p">The ZIP contains everything, plus a synthetic demo org so the dashboard works immediately — explore the whole interface before connecting any real account.</p>
+      <div class="btn-row"><a class="btn" href="downloads/parAdots-oss.zip" download data-i18n="ins.dl_btn">Download parAdots (ZIP)</a></div>
+      <p class="dl-meta" data-i18n="ins.dl_meta">Version 2026-10-18 · needs Python 3.10+ and Google Chrome · MIT&nbsp;licensed</p>
+    </div>
+  </div>
+</section>
+
+<section class="band-deep">
+  <div class="wrap">
+    <span class="eyebrow" data-i18n="ins.qs_eyebrow">quick start · one click</span>
+    <h2 data-i18n="ins.qs_h">The recommended way</h2>
+    <ol class="howto">
+      <li data-i18n="ins.qs_1">Download the package and unzip it.</li>
+      <li data-i18n="ins.qs_2">Double-click <code>parAdots.command</code> (macOS) or <code>parAdots.bat</code> (Windows).</li>
+      <li data-i18n="ins.qs_3">The first start installs everything automatically and opens the dashboard at <code>http://localhost:8765</code>. Every later start opens straight away.</li>
+    </ol>
+    <div class="note">
+      <h3 data-i18n="ins.qs_note_h">First-launch security note</h3>
+      <p data-i18n="ins.qs_note">On macOS, right-click <code>parAdots.command</code> → <b>Open</b> once to get past Gatekeeper. On Windows, if SmartScreen warns, choose <b>More info → Run anyway</b>.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="eyebrow" data-i18n="ins.ms_eyebrow">manual setup · all platforms</span>
+    <h2 data-i18n="ins.ms_h">For the command line</h2>
+
+    <h3 class="subh" data-i18n="ins.ms_prereq_h">Prerequisites</h3>
+    <ul class="prereq">
+      <li data-i18n="ins.ms_pr1">Python 3.10 or newer</li>
+      <li data-i18n="ins.ms_pr2">Google Chrome (used for session-based authentication)</li>
+      <li data-i18n="ins.ms_pr3">Network access to your Pardot and Salesforce environments</li>
+      <li data-i18n="ins.ms_pr4">For Salesforce: the Salesforce CLI logged in, or an active browser session</li>
+    </ul>
+
+    <h3 class="subh" data-i18n="ins.ms_steps_h">Setup — identical on Mac and Windows</h3>
+    <ol class="howto">
+      <li data-i18n="ins.ms_1">Download or clone the parAdots repository.</li>
+      <li><span data-i18n="ins.ms_2">Install the Python dependencies.</span><code class="cmd">pip install -r requirements.txt</code></li>
+      <li><span data-i18n="ins.ms_3">Install the browser Playwright uses.</span><code class="cmd">playwright install chromium</code></li>
+      <li data-i18n="ins.ms_4">Copy the config template to <code>configs/your-org.env</code> and fill in your credentials.</li>
+      <li><span data-i18n="ins.ms_5">Select the org you want to audit.</span><code class="cmd">python set_org.py --org your-org</code></li>
+      <li><span data-i18n="ins.ms_6">Run the audit <span class="muted">(add <code>--no-sf</code> to skip Salesforce)</span>.</span><code class="cmd">python run_all.py</code></li>
+      <li><span data-i18n="ins.ms_7">Open the viewer, then browse to <code>http://localhost:8765</code>.</span><code class="cmd">python viewer.py</code></li>
+    </ol>
+
+    <div class="plat">
+      <div class="pcard"><b data-i18n="ins.ms_mac_h">macOS</b><br><span data-i18n="ins.ms_mac">Install Python via Homebrew (<code>brew install python@3.13</code>) or from python.org. Create and activate the virtual environment with <code>python3 -m venv .venv</code> and <code>source .venv/bin/activate</code>.</span></div>
+      <div class="pcard"><b data-i18n="ins.ms_win_h">Windows</b><br><span data-i18n="ins.ms_win">Install Python from python.org (tick "Add Python to PATH") or via <code>winget</code>. In PowerShell, activate the venv with <code>.venv\Scripts\Activate.ps1</code>. Make sure Chrome is installed.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band-deep">
+  <div class="wrap">
+    <div class="licensebox">
+      <span class="eyebrow" data-i18n="ins.lic_eyebrow">license</span>
+      <h2 style="max-width:18ch" data-i18n="ins.lic_h">Yours to use and build on.</h2>
+      <p class="lead" style="margin-bottom:.6em" data-i18n="ins.lic_p">parAdots is open source under the MIT License. You are free to use, modify, distribute and further develop it — for any purpose, including commercially. It is provided as is, at your own responsibility, with no warranty of any kind.</p>
+      <p class="muted" data-i18n="ins.lic_note">The full license text ships as <code>LICENSE</code> inside the package.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <span class="wordmark">par<span class="cap">A</span>dots</span>
+    <p data-i18n="foot.tag">pardot &amp; salesforce audit suite · Nadya Higazi</p>
+  </div>
+</footer>
+
+<script src="i18n.js"></script>
+</body>
+</html>

@@ -17,70 +17,71 @@
   <div class="wrap nav">
     <a class="brandmark" href="index.html" aria-label="parAdots home"><img src="assets/parAdots-logo.svg" alt="parAdots"></a>
     <nav class="nav-links">
-      <a href="index.html" class="hide-sm">home</a>
-      <a href="scenarios.html" class="hide-sm">use cases</a>
-      <a href="engagement-studio.html" class="hide-sm">engagement studio</a>
-      <a href="workboard.html" class="hide-sm">workboard</a>
-      <a href="how-it-works.html" class="active">how it works</a>
-      <a href="about.html" class="hide-sm">about</a>
-      <a href="request-access.html" class="nav-cta">request access</a>
+      <a href="index.html" class="hide-sm" data-i18n="nav.home">home</a>
+      <a href="scenarios.html" class="hide-sm" data-i18n="nav.uc">use cases</a>
+      <a href="engagement-studio.html" class="hide-sm" data-i18n="nav.es">engagement studio</a>
+      <a href="how-it-works.html" class="active" data-i18n="nav.hiw">how it works</a>
+      <a href="install.html" class="hide-sm" data-i18n="nav.install">install</a>
+      <a href="request-access.html" class="nav-cta" data-i18n="nav.cta">request access</a>
+      <span class="langtoggle" role="group" aria-label="Language"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></span>
     </nav>
   </div>
 </header>
 
 <div class="page-head">
   <div class="wrap">
-    <span class="eyebrow">how it works</span>
-    <h1 style="font-size:clamp(2rem,5vw,3.2rem);max-width:16ch">four layers, one command.</h1>
-    <p class="lead">Each layer writes clean, org-scoped data the next one reads. Run the whole chain with <code>run_all.py</code>, or any single step on its own.</p>
+    <span class="eyebrow" data-i18n="hiw.eyebrow">how it works</span>
+    <h1 style="font-size:clamp(2rem,5vw,3.2rem);max-width:16ch" data-i18n="hiw.h1">four layers, one command.</h1>
+    <p class="lead" data-i18n="hiw.lead">Each layer writes clean, org-scoped data the next one reads. Run the whole chain with <code>run_all.py</code>, or any single step on its own.</p>
   </div>
 </div>
 
 <section>
   <div class="wrap">
     <div class="pipe">
-      <div class="step"><span class="num">01 / collect</span><h3>collect</h3><p>30+ scrapers pull Pardot config over the v5 REST API and a real browser session, and Salesforce over REST / SOQL — no connected app, MFA-safe.</p></div>
-      <div class="step"><span class="num">02 / enrich</span><h3>enrich</h3><p>Every asset and program gets a plain-language, AI-generated description of what it actually does — deterministic, so the same input always reads the same way.</p></div>
-      <div class="step"><span class="num">03 / analyze</span><h3>analyze</h3><p>A cross-reference engine maps every dependency and finds orphans; 14 checks score the setup against best practice and GDPR consent rules; process discovery reconstructs whole flows.</p></div>
-      <div class="step"><span class="num">04 / visualize</span><h3>visualize</h3><p>An interactive viewer, editable draw.io diagrams and a severity-ranked report turn the data into something you can zoom, export and talk about.</p></div>
+      <div class="step"><span class="num" data-i18n="hiw.s1_num">01 / collect</span><h3 data-i18n="hiw.s1_h">collect</h3><p data-i18n="hiw.s1_p">30+ scrapers pull Pardot config over the v5 REST API and a real browser session, and Salesforce over REST / SOQL — no connected app, MFA-safe.</p></div>
+      <div class="step"><span class="num" data-i18n="hiw.s2_num">02 / enrich</span><h3 data-i18n="hiw.s2_h">enrich</h3><p data-i18n="hiw.s2_p">Every asset and program gets a plain-language, AI-generated description of what it actually does — deterministic, so the same input always reads the same way.</p></div>
+      <div class="step"><span class="num" data-i18n="hiw.s3_num">03 / analyze</span><h3 data-i18n="hiw.s3_h">analyze</h3><p data-i18n="hiw.s3_p">A cross-reference engine maps every dependency and finds orphans; 14 checks score the setup against best practice and GDPR consent rules; process discovery reconstructs whole flows.</p></div>
+      <div class="step"><span class="num" data-i18n="hiw.s4_num">04 / visualize</span><h3 data-i18n="hiw.s4_h">visualize</h3><p data-i18n="hiw.s4_p">An interactive viewer, editable draw.io diagrams and a severity-ranked report turn the data into something you can zoom, export and talk about.</p></div>
     </div>
   </div>
 </section>
 
 <section class="band-deep">
   <div class="wrap">
-    <span class="eyebrow">what it reads</span>
-    <h2>The whole estate, not a sample.</h2>
-    <p class="lead" style="margin-bottom:2.6em">Every object below is scraped, enriched and cross-referenced. Thresholds are set per org, so a small instance is never judged by a big one's bar.</p>
+    <span class="eyebrow" data-i18n="hiw.cov_eyebrow">what it reads</span>
+    <h2 data-i18n="hiw.cov_h2">The whole estate, not a sample.</h2>
+    <p class="lead" style="margin-bottom:2.6em" data-i18n="hiw.cov_lead">Every object below is scraped, enriched and cross-referenced. Thresholds are set per org, so a small instance is never judged by a big one's bar.</p>
     <div class="cov">
-      <div class="cov-col"><h3><span class="tag">pardot</span> account engagement</h3>
+      <div class="cov-col"><h3 data-i18n="hiw.cov_pardot_h"><span class="tag">pardot</span> account engagement</h3>
         <div class="tags"><span>Dynamic Lists</span><span>Static Lists</span><span>Automations</span><span>Forms</span><span>Form Handlers</span><span>Email Templates</span><span>List Emails</span><span>Landing Pages</span><span>Scoring &amp; Grading</span><span>Engagement Studio</span><span>Dynamic Content</span><span>Custom Redirects</span><span>Campaigns</span><span>Snippets</span><span>Preference Center</span><span>Page Actions</span><span>Files</span><span>Users</span></div>
       </div>
-      <div class="cov-col"><h3><span class="tag">salesforce</span> connected org</h3>
+      <div class="cov-col"><h3 data-i18n="hiw.cov_sf_h"><span class="tag">salesforce</span> connected org</h3>
         <div class="tags"><span>Campaign Attribution</span><span>Opt-In Sync Audit</span><span>Lead Quality</span><span>Opportunity Attribution</span><span>Sync Errors</span><span>Field Mapping</span><span>Account Hierarchy</span><span>Task &amp; Activity</span><span>Reports Inventory</span><span>Storage Usage</span><span>Campaign Members</span></div>
       </div>
     </div>
-    <h3 style="margin-top:3em;font-family:var(--font-display);font-size:1.25rem">What the analysis flags</h3>
+    <h3 style="margin-top:3em;font-family:var(--font-display);font-size:1.25rem" data-i18n="hiw.flags_h">What the analysis flags</h3>
     <ul class="checks">
-      <li>Orphaned lists, automations and templates referenced nowhere</li>
-      <li>Dynamic content whose source field no longer exists</li>
-      <li>Forms with no completion actions</li>
-      <li>Assets and campaigns with no attribution</li>
-      <li>Paused automations piling up unseen</li>
-      <li>Consent expiry &amp; GDPR coverage gaps</li>
-      <li>Scoring, grading and progressive-profiling gaps</li>
-      <li>Engagement Studio &amp; connected-campaign coverage</li>
+      <li data-i18n="hiw.f1">Orphaned lists, automations and templates referenced nowhere</li>
+      <li data-i18n="hiw.f2">Dynamic content whose source field no longer exists</li>
+      <li data-i18n="hiw.f3">Forms with no completion actions</li>
+      <li data-i18n="hiw.f4">Assets and campaigns with no attribution</li>
+      <li data-i18n="hiw.f5">Paused automations piling up unseen</li>
+      <li data-i18n="hiw.f6">Consent expiry &amp; GDPR coverage gaps</li>
+      <li data-i18n="hiw.f7">Scoring, grading and progressive-profiling gaps</li>
+      <li data-i18n="hiw.f8">Engagement Studio &amp; connected-campaign coverage</li>
     </ul>
-    <div class="btn-row"><a class="btn" href="scenarios.html">See the use cases</a></div>
+    <div class="btn-row"><a class="btn" href="scenarios.html" data-i18n="hiw.btn">See the use cases</a></div>
   </div>
 </section>
 
 <footer>
   <div class="wrap foot">
     <span class="wordmark">par<span class="cap">A</span>dots</span>
-    <p>pardot &amp; salesforce audit suite · Nadya Higazi</p>
+    <p data-i18n="foot.tag">pardot &amp; salesforce audit suite · Nadya Higazi</p>
   </div>
 </footer>
 
+<script src="i18n.js"></script>
 </body>
 </html>

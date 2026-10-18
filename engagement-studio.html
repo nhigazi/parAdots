@@ -17,43 +17,43 @@
   <div class="wrap nav">
     <a class="brandmark" href="index.html" aria-label="parAdots home"><img src="assets/parAdots-logo.svg" alt="parAdots"></a>
     <nav class="nav-links">
-      <a href="index.html" class="hide-sm">home</a>
-      <a href="scenarios.html" class="hide-sm">use cases</a>
-      <a href="engagement-studio.html" class="active">engagement studio</a>
-      <a href="workboard.html" class="hide-sm">workboard</a>
-      <a href="how-it-works.html" class="hide-sm">how it works</a>
-      <a href="about.html" class="hide-sm">about</a>
-      <a href="request-access.html" class="nav-cta">request access</a>
+      <a href="index.html" class="hide-sm" data-i18n="nav.home">home</a>
+      <a href="scenarios.html" class="hide-sm" data-i18n="nav.uc">use cases</a>
+      <a href="engagement-studio.html" class="active" data-i18n="nav.es">engagement studio</a>
+      <a href="how-it-works.html" class="hide-sm" data-i18n="nav.hiw">how it works</a>
+      <a href="install.html" class="hide-sm" data-i18n="nav.install">install</a>
+      <a href="request-access.html" class="nav-cta" data-i18n="nav.cta">request access</a>
+      <span class="langtoggle" role="group" aria-label="Language"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></span>
     </nav>
   </div>
 </header>
 
 <div class="page-head">
   <div class="wrap">
-    <span class="eyebrow">engagement studio, decoded</span>
-    <h1 style="font-size:clamp(2rem,5vw,3.2rem);max-width:20ch">The hardest thing to hand a client is a Pardot program.</h1>
-    <p class="lead">parAdots renders any Engagement Studio program — even a 65-step re-engagement flow — as one navigable diagram, with a plain-language summary of what it does. (Client names are masked as <code>YZ</code>.)</p>
+    <span class="eyebrow" data-i18n="es.eyebrow">engagement studio, decoded</span>
+    <h1 style="font-size:clamp(2rem,5vw,3.2rem);max-width:20ch" data-i18n="es.h1">The hardest thing to hand a client is a Pardot program.</h1>
+    <p class="lead" data-i18n="es.lead">parAdots renders any Engagement Studio program — even a 65-step re-engagement flow — as one navigable diagram, with a plain-language summary of what it does. (Client names are masked as <code>YZ</code>.)</p>
   </div>
 </div>
 
 <section>
   <div class="wrap wide">
-    <figure><div class="frame"><img src="shots/es-reeng.jpg" alt="A 65-step re-engagement program shown fit-to-view, with an AI-generated summary at the top and PNG, workboard and zoom controls highlighted" loading="lazy"></div><figcaption>65-step re-engagement program · fit to view, with AI-generated summary</figcaption></figure>
+    <figure><div class="frame"><img src="shots/es-reeng.jpg" alt="A 65-step re-engagement program shown fit-to-view, with an AI-generated summary at the top and PNG, workboard and zoom controls highlighted" loading="lazy"></div><figcaption data-i18n="es.cap">65-step re-engagement program · fit to view, with AI-generated summary</figcaption></figure>
     <div class="feat3">
       <div class="feat">
         <div class="ic"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2l1.8 4.4L16.5 8l-4.7 1.6L10 14l-1.8-4.4L3.5 8l4.7-1.6z" fill="#00a88f"/></svg></div>
-        <h3>AI-generated summary</h3>
-        <p>Each program gets a readable description built from its real steps, so a 65-step consent flow reads as a paragraph, not a puzzle.</p>
+        <h3 data-i18n="es.f1_h">AI-generated summary</h3>
+        <p data-i18n="es.f1_p">Each program gets a readable description built from its real steps, so a 65-step consent flow reads as a paragraph, not a puzzle.</p>
       </div>
       <div class="feat">
         <div class="ic"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.2" stroke="#00a88f" stroke-width="1.8"/><path d="M13 13l4 4" stroke="#00a88f" stroke-width="1.8" stroke-linecap="round"/><path d="M7 9h4M9 7v4" stroke="#00a88f" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-        <h3>Zoom to any size</h3>
-        <p>Zoom from a single decision node out to the entire program and back. Nothing is too big to take in at a glance.</p>
+        <h3 data-i18n="es.f2_h">Zoom to any size</h3>
+        <p data-i18n="es.f2_p">Zoom from a single decision node out to the entire program and back. Nothing is too big to take in at a glance.</p>
       </div>
       <div class="feat">
         <div class="ic"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 3v9m0 0l-3.2-3.2M10 12l3.2-3.2" stroke="#00a88f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15.5h12" stroke="#00a88f" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-        <h3>Export anywhere</h3>
-        <p>Export the full logic as a PNG for a slide deck, or push it straight to a shared workboard to review with the client.</p>
+        <h3 data-i18n="es.f3_h">Export anywhere</h3>
+        <p data-i18n="es.f3_p">Export the full logic as a PNG for a slide deck, or push it straight to a shared workboard to review with the client.</p>
       </div>
     </div>
   </div>
@@ -61,20 +61,20 @@
 
 <section class="band-deep">
   <div class="wrap">
-    <span class="eyebrow">process discovery</span>
-    <h2 style="max-width:18ch">It finds the processes, not just the assets.</h2>
-    <p class="lead" style="margin-bottom:1em">parAdots works in two steps. First it <b>analyses</b> the org and detects existing newsletter sign-up, double-opt-in and re-engagement processes automatically. Then it <b>builds</b> each one — across forms, lists, automations and Engagement Studio — into a single, readable diagram you can verify and hand over.</p>
-    <div class="payoff"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#00705f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p>Hand a client the process they already have — verified, in one picture.</p></div>
+    <span class="eyebrow" data-i18n="es.pd_eyebrow">process discovery</span>
+    <h2 style="max-width:18ch" data-i18n="es.pd_h2">It finds the processes, not just the assets.</h2>
+    <p class="lead" style="margin-bottom:1em" data-i18n="es.pd_lead">parAdots works in two steps. First it <b>analyses</b> the org and detects existing newsletter sign-up, double-opt-in and re-engagement processes automatically. Then it <b>builds</b> each one — across forms, lists, automations and Engagement Studio — into a single, readable diagram you can verify and hand over.</p>
+    <div class="payoff"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#00705f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p data-i18n="es.pd_payoff">Hand a client the process they already have — verified, in one picture.</p></div>
     <div class="steps2">
       <figure>
-        <p class="steplab">01 · detect</p>
+        <p class="steplab" data-i18n="es.pd_s1lab">01 · detect</p>
         <div class="frame"><img src="shots/process-analyse.jpg" alt="The Processes tab with a one-click Start analysis button to detect existing newsletter processes in the org" loading="lazy"></div>
-        <figcaption>one run scans the org for existing processes</figcaption>
+        <figcaption data-i18n="es.pd_s1cap">one run scans the org for existing processes</figcaption>
       </figure>
       <figure class="narrow">
-        <p class="steplab">02 · build</p>
+        <p class="steplab" data-i18n="es.pd_s2lab">02 · build</p>
         <div class="frame"><img src="shots/process.jpg" alt="A reconstructed newsletter sign-up process, from form submission through CRM creation, welcome email and double-opt-in confirmation" loading="lazy"></div>
-        <figcaption>each one rebuilt as a readable diagram</figcaption>
+        <figcaption data-i18n="es.pd_s2cap">each one rebuilt as a readable diagram</figcaption>
       </figure>
     </div>
   </div>
@@ -83,9 +83,10 @@
 <footer>
   <div class="wrap foot">
     <span class="wordmark">par<span class="cap">A</span>dots</span>
-    <p>pardot &amp; salesforce audit suite · Nadya Higazi</p>
+    <p data-i18n="foot.tag">pardot &amp; salesforce audit suite · Nadya Higazi</p>
   </div>
 </footer>
 
+<script src="i18n.js"></script>
 </body>
 </html>

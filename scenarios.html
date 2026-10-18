@@ -17,22 +17,22 @@
   <div class="wrap nav">
     <a class="brandmark" href="index.html" aria-label="parAdots home"><img src="assets/parAdots-logo.svg" alt="parAdots"></a>
     <nav class="nav-links">
-      <a href="index.html" class="hide-sm">home</a>
-      <a href="scenarios.html" class="active">use cases</a>
-      <a href="engagement-studio.html" class="hide-sm">engagement studio</a>
-      <a href="workboard.html" class="hide-sm">workboard</a>
-      <a href="how-it-works.html" class="hide-sm">how it works</a>
-      <a href="about.html" class="hide-sm">about</a>
-      <a href="request-access.html" class="nav-cta">request access</a>
+      <a href="index.html" class="hide-sm" data-i18n="nav.home">home</a>
+      <a href="scenarios.html" class="active" data-i18n="nav.uc">use cases</a>
+      <a href="engagement-studio.html" class="hide-sm" data-i18n="nav.es">engagement studio</a>
+      <a href="how-it-works.html" class="hide-sm" data-i18n="nav.hiw">how it works</a>
+      <a href="install.html" class="hide-sm" data-i18n="nav.install">install</a>
+      <a href="request-access.html" class="nav-cta" data-i18n="nav.cta">request access</a>
+      <span class="langtoggle" role="group" aria-label="Language"><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button></span>
     </nav>
   </div>
 </header>
 
 <div class="page-head">
   <div class="wrap">
-    <span class="eyebrow">where it earns its keep</span>
-    <h1 style="font-size:clamp(2rem,5vw,3.2rem);max-width:18ch">three moments in a consultant's week.</h1>
-    <p class="lead">parAdots was built around the jobs that eat the most time and carry the most risk.</p>
+    <span class="eyebrow" data-i18n="uc.eyebrow">where it earns its keep</span>
+    <h1 style="font-size:clamp(2rem,5vw,3.2rem);max-width:18ch" data-i18n="uc.h1">three moments in a consultant's week.</h1>
+    <p class="lead" data-i18n="uc.lead">parAdots was built around the jobs that eat the most time and carry the most risk.</p>
   </div>
 </div>
 
@@ -41,47 +41,48 @@
 
     <div class="scenario">
       <div class="s-body">
-        <div class="s-index">01 — analysing a new org</div>
-        <h3 class="s-h">From blind spot to full map on day one.</h3>
-        <p class="muted">You inherit an org you have never seen. Someone built it over five years and documented none of it; the real architecture lives across a thousand screens.</p>
-        <div class="prob"><span class="label">what parAdots does</span>One run inventories every asset, builds the dependency map, flags orphaned lists and broken personalization, and scores the whole setup against 14 best-practice and consent checks.</div>
-        <div class="payoff"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#00705f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p>Walk in blind on Monday, present a findings-backed picture of the org by end of day one.</p></div>
+        <div class="s-index" data-i18n="uc.s1_index">01 — analysing a new org</div>
+        <h3 class="s-h" data-i18n="uc.s1_h">From blind spot to full map on day one.</h3>
+        <p class="muted" data-i18n="uc.s1_muted">You inherit an org you have never seen. Someone built it over five years and documented none of it; the real architecture lives across a thousand screens.</p>
+        <div class="prob"><span class="label" data-i18n="common.what">what parAdots does</span><span data-i18n="uc.s1_prob">One run inventories every asset, builds the dependency map, flags orphaned lists and broken personalization, and scores the whole setup against 14 best-practice and consent checks.</span></div>
+        <div class="payoff"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#00705f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p data-i18n="uc.s1_payoff">Walk in blind on Monday, present a findings-backed picture of the org by end of day one.</p></div>
       </div>
-      <div class="s-art"><figure><div class="frame"><img src="shots/overview.jpg" alt="parAdots overview — every asset type shown as one orbital map, grouped by Salesforce sync status" loading="lazy"></div><figcaption>overview · the whole org as one map</figcaption></figure></div>
+      <div class="s-art"><figure><div class="frame"><img src="shots/overview.jpg" alt="parAdots overview — every asset type shown as one orbital map, grouped by Salesforce sync status" loading="lazy"></div><figcaption data-i18n="uc.s1_cap">overview · the whole org as one map</figcaption></figure></div>
     </div>
 
     <div class="scenario flip">
       <div class="s-body">
-        <div class="s-index">02 — working with existing orgs</div>
-        <h3 class="s-h">Keep every org honest over time.</h3>
-        <p class="muted">Live orgs drift. Paused automations pile up, fields get retired out from under dynamic content, and prospect-sync errors accumulate quietly in the background.</p>
-        <div class="prob"><span class="label">what parAdots does</span>From one cockpit you re-run any scraper, diff against the last audit, resolve sync errors, and trigger enrichment, the cross-reference map or the gap report — the same way for every client org you manage.</div>
-        <div class="payoff"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#00705f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p>Stay on top of every client org without living inside its admin screens.</p></div>
+        <div class="s-index" data-i18n="uc.s2_index">02 — working with existing orgs</div>
+        <h3 class="s-h" data-i18n="uc.s2_h">Keep every org honest over time.</h3>
+        <p class="muted" data-i18n="uc.s2_muted">Live orgs drift. Paused automations pile up, fields get retired out from under dynamic content, and prospect-sync errors accumulate quietly in the background.</p>
+        <div class="prob"><span class="label" data-i18n="common.what">what parAdots does</span><span data-i18n="uc.s2_prob">From one cockpit you re-run any scraper, diff against the last audit, resolve sync errors, and trigger enrichment, the cross-reference map or the gap report — the same way for every client org you manage.</span></div>
+        <div class="payoff"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#00705f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p data-i18n="uc.s2_payoff">Stay on top of every client org without living inside its admin screens.</p></div>
       </div>
-      <div class="s-art"><figure><div class="frame"><img src="shots/cockpit.jpg" alt="parAdots cockpit — buttons to run each Pardot and Salesforce scraper, plus analysis and enrichment jobs" loading="lazy"></div><figcaption>cockpit · re-run, diff &amp; remediate</figcaption></figure></div>
+      <div class="s-art"><figure><div class="frame"><img src="shots/cockpit.jpg" alt="parAdots cockpit — buttons to run each Pardot and Salesforce scraper, plus analysis and enrichment jobs" loading="lazy"></div><figcaption data-i18n="uc.s2_cap">cockpit · re-run, diff &amp; remediate</figcaption></figure></div>
     </div>
 
     <div class="scenario">
       <div class="s-body">
-        <div class="s-index">03 — discussing new processes</div>
-        <h3 class="s-h">A picture the customer can actually read.</h3>
-        <p class="muted">Designing a new opt-in, re-engagement or nurture flow with a client means everyone in the room picturing something slightly different — and no one quite sure what already exists.</p>
-        <div class="prob"><span class="label">what parAdots does</span>Every Engagement Studio program renders as a clean, collapsible flowchart — decisions, waits, actions and end states laid out exactly as they run, over the assets that are actually live.</div>
-        <div class="payoff"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#00705f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p>The conversation is about the process, not about decoding Pardot.</p></div>
+        <div class="s-index" data-i18n="uc.s3_index">03 — discussing new processes</div>
+        <h3 class="s-h" data-i18n="uc.s3_h">A picture the customer can actually read.</h3>
+        <p class="muted" data-i18n="uc.s3_muted">Designing a new opt-in, re-engagement or nurture flow with a client means everyone in the room picturing something slightly different — and no one quite sure what already exists.</p>
+        <div class="prob"><span class="label" data-i18n="common.what">what parAdots does</span><span data-i18n="uc.s3_prob">Every Engagement Studio program renders as a clean, collapsible flowchart — decisions, waits, actions and end states laid out exactly as they run, over the assets that are actually live.</span></div>
+        <div class="payoff"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#00705f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p data-i18n="uc.s3_payoff">The conversation is about the process, not about decoding Pardot.</p></div>
       </div>
-      <div class="s-art"><figure><div class="frame"><img src="shots/es-flow.jpg" alt="An Engagement Studio consent reminder program rendered as a readable flowchart with decision and action nodes" loading="lazy"></div><figcaption>engagement studio · rendered as a readable flow</figcaption></figure></div>
+      <div class="s-art"><figure><div class="frame"><img src="shots/es-flow.jpg" alt="An Engagement Studio consent reminder program rendered as a readable flowchart with decision and action nodes" loading="lazy"></div><figcaption data-i18n="uc.s3_cap">engagement studio · rendered as a readable flow</figcaption></figure></div>
     </div>
 
-    <div class="btn-row"><a class="btn" href="engagement-studio.html">More on Engagement Studio &amp; process discovery</a></div>
+    <div class="btn-row"><a class="btn" href="engagement-studio.html" data-i18n="uc.btn">More on Engagement Studio &amp; process discovery</a></div>
   </div>
 </section>
 
 <footer>
   <div class="wrap foot">
     <span class="wordmark">par<span class="cap">A</span>dots</span>
-    <p>pardot &amp; salesforce audit suite · Nadya Higazi</p>
+    <p data-i18n="foot.tag">pardot &amp; salesforce audit suite · Nadya Higazi</p>
   </div>
 </footer>
 
+<script src="i18n.js"></script>
 </body>
 </html>
