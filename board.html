@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>parAdots · Workboard</title>
+<!--
+  parAdots Workboard — kollaboratives Prozess- & Kanban-Board.
+  Geteilter Zustand in Supabase, geschuetzt durch einen Zugangskey (DB-seitig via RPC geprueft).
+  KONFIG: siehe CONFIG-Block unten. Das SQL-Schema liegt in supabase_workboard.sql.
+-->
+<style>
+  :root{
+    --bg:#f5f7fb; --panel:#ffffff; --ink:#1b2430; --muted:#6b7686;
+    --line:#e2e7ef; --accent:#3b66e0; --accent-ink:#17306b; --accent-soft:#e8efff;
+    --shadow:0 1px 3px rgba(20,30,50,.08),0 6px 20px rgba(20,30,50,.06);
+    --radius:12px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f141c; --panel:#161d28; --ink:#e7ecf3; --muted:#93a0b2;
+      --line:#273040; --accent:#6b8cff; --accent-ink:#c7d4ff; --accent-soft:#1d2740;
+      --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:var(--bg);overflow:hidden}
+  button,input,select,textarea{font:inherit;color:inherit}
+  .wordmark{font-weight:700;letter-spacing:.2px;font-size:16px;white-space:nowrap}
+  .wordmark b{color:var(--accent)}
+  button{cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:8px;
+         padding:7px 11px;color:var(--ink);transition:.12s}
+  button:hover{border-color:var(--accent);color:var(--accent)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  button.primary:hover{filter:brightness(1.05);color:#fff}
+  button.ghost{background:transparent;border-color:transparent;color:var(--muted);padding:6px 8px}
+  button.ghost:hover{color:var(--accent);background:var(--accent-soft)}
+  button.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+  select,input,textarea{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+
+  /* ---- Gate ---- */
+  #gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+        background:linear-gradient(160deg,var(--bg),var(--accent-soft));z-index:50}
+  #gate .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+        box-shadow:var(--shadow);padding:30px 28px;width:min(92vw,380px);text-align:center}
+  #gate .logo{font-size:26px;font-weight:800;margin-bottom:4px}
+  #gate .logo b{color:var(--accent)}
+  #gate p{color:var(--muted);margin:.2em 0 1.2em}
+  #gate input{width:100%;text-align:center;margin-bottom:12px;padding:10px}
+  #gate .row{display:flex;gap:8px;align-items:center;justify-content:center;color:var(--muted);font-size:13px;margin-top:10px}
+  #gateErr{color:#d64545;min-height:1.2em;font-size:13px;margin-top:8px}
+
+  /* ---- App shell ---- */
+  #app{display:none;flex-direction:column;height:100%}
+  .topbar{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--panel);
+          border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .topbar .sp{flex:1}
+  .toolbar{display:flex;align-items:center;gap:7px;padding:8px 14px;background:var(--panel);
+           border-bottom:1px solid var(--line);flex-wrap:wrap;min-height:50px}
+  .toolbar .hint{color:var(--muted);font-size:12.5px;margin-left:6px}
+  .sep{width:1px;height:24px;background:var(--line);margin:0 4px}
+  .dot{width:9px;height:9px;border-radius:50%;background:#b7c0ce;display:inline-block}
+  .dot.ok{background:#2fa360}.dot.sync{background:var(--accent)}.dot.err{background:#d64545}
+  .swatch{width:22px;height:22px;border-radius:6px;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+  .swatch.sel{box-shadow:0 0 0 2px var(--accent)}
+  main{flex:1;position:relative;overflow:hidden}
+
+  /* ---- Canvas ---- */
+  #canvasWrap{position:absolute;inset:0;overflow:hidden;background:
+     radial-gradient(circle at 1px 1px, rgba(120,130,150,.22) 1px, transparent 0) 0 0/22px 22px, var(--bg)}
+  #canvas{width:100%;height:100%;display:block;touch-action:none;user-select:none}
+  .node-shape{cursor:grab}
+  .node.dragging .node-shape{cursor:grabbing}
+  .node.sel .node-shape{filter:drop-shadow(0 0 0 2px var(--accent))}
+  .node foreignObject div{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+        text-align:center;padding:6px 8px;font-size:13px;line-height:1.25;overflow:hidden;word-break:break-word}
+  .edge-path{fill:none;stroke:var(--muted);stroke-width:2}
+  .edge.sel .edge-path{stroke:var(--accent);stroke-width:3}
+  .edge-hit{fill:none;stroke:transparent;stroke-width:14;cursor:pointer}
+  .edge-label{font-size:12px;fill:var(--ink)}
+  #nodeEditor{position:absolute;display:none;border:2px solid var(--accent);border-radius:8px;
+     padding:6px;resize:none;z-index:6;box-shadow:var(--shadow);text-align:center}
+  .zoombar{position:absolute;right:14px;bottom:14px;display:flex;flex-direction:column;gap:6px;z-index:4}
+  .zoombar button{width:38px;height:34px;box-shadow:var(--shadow)}
+  .connect-badge{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:5;
+     background:var(--accent);color:#fff;padding:6px 14px;border-radius:999px;font-size:13px;box-shadow:var(--shadow);display:none}
+
+  /* ---- Kanban ---- */
+  #kanban{position:absolute;inset:0;display:flex;gap:14px;padding:16px;overflow-x:auto}
+  .col{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+       width:300px;min-width:260px;display:flex;flex-direction:column;max-height:100%}
+  .col.drop{outline:2px dashed var(--accent);outline-offset:-4px}
+  .col h3{margin:0;padding:12px 14px;font-size:13.5px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+  .col h3 .count{color:var(--muted);font-weight:500}
+  .col .cards{padding:10px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:9px}
+  .kcard{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 11px;cursor:pointer;box-shadow:var(--shadow)}
+  .kcard:hover{border-color:var(--accent)}
+  .kcard .t{font-weight:600;margin-bottom:3px}
+  .kcard .d{color:var(--muted);font-size:12.5px;white-space:pre-wrap;max-height:4.2em;overflow:hidden}
+  .kcard .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink)}
+  .chip.assignee{background:#eef1f4;color:#2b3440}
+  .col .add{margin:8px 10px 12px;border-style:dashed;color:var(--muted)}
+
+  /* ---- Modal ---- */
+  .overlay{position:fixed;inset:0;background:rgba(15,20,30,.45);display:none;align-items:center;justify-content:center;z-index:40}
+  .overlay.show{display:flex}
+  .modal{background:var(--panel);border-radius:14px;box-shadow:var(--shadow);width:min(94vw,460px);padding:20px 22px}
+  .modal h3{margin:0 0 14px}
+  .modal label{display:block;font-size:12.5px;color:var(--muted);margin:10px 0 4px}
+  .modal input,.modal textarea,.modal select{width:100%}
+  .modal textarea{min-height:84px;resize:vertical}
+  .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+  .modal .actions .sp{flex:1}
+  .radio{display:flex;gap:8px;margin-top:6px}
+  .radio label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;
+     padding:8px 12px;cursor:pointer;color:var(--ink);margin:0;flex:1}
+  .radio input{width:auto}
+  .radio label.sel{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- ============ Zugangs-Gate ============ -->
+<div id="gate">
+  <div class="card">
+    <div class="logo">par<b>A</b>dots</div>
+    <div class="wordmark" style="color:var(--muted);font-weight:600" data-i="wb">Workboard</div>
+    <p data-i="gateHint">Bitte Zugangskey eingeben.</p>
+    <input id="gateKey" type="password" autocomplete="off" data-ph="gatePh">
+    <button class="primary" id="gateGo" style="width:100%;padding:10px" data-i="enter">Öffnen</button>
+    <div id="gateErr"></div>
+    <div class="row"><label style="display:flex;gap:6px;align-items:center;cursor:pointer">
+      <input type="checkbox" id="gateRemember" checked style="width:auto"> <span data-i="remember">Auf diesem Gerät merken</span></label></div>
+  </div>
+</div>
+
+<!-- ============ App ============ -->
+<div id="app">
+  <div class="topbar">
+    <span class="wordmark">par<b>A</b>dots <span style="color:var(--muted);font-weight:600" data-i="wb">Workboard</span></span>
+    <span class="sep"></span>
+    <select id="boardSel" title="Board"></select>
+    <button class="ghost" id="newBoard" data-i="newBoard">+ Board</button>
+    <button class="ghost" id="renameBoard" title="" data-i="rename">Umbenennen</button>
+    <button class="ghost" id="delBoard" title="" data-i="delete">Löschen</button>
+    <span class="sp"></span>
+    <span class="dot" id="syncDot" title="Sync"></span>
+    <button class="ghost" id="langBtn">DE / EN</button>
+    <button class="ghost" id="lockBtn" data-i="lock">Sperren</button>
+  </div>
+
+  <!-- Prozess-Toolbar -->
+  <div class="toolbar" id="procTools">
+    <button data-shape="rect"      data-i="shRect">▭ Prozess</button>
+    <button data-shape="rounded"   data-i="shRounded">▢ Aktion</button>
+    <button data-shape="decision"  data-i="shDecision">◇ Entscheidung</button>
+    <button data-shape="startend"  data-i="shStart">⬭ Start/Ende</button>
+    <button data-shape="note"      data-i="shNote">▤ Notiz</button>
+    <span class="sep"></span>
+    <button id="connectBtn" data-i="connect">↳ Verbinden</button>
+    <button id="delSel" data-i="delSel">Löschen</button>
+    <span class="sep"></span>
+    <span id="palette" style="display:flex;gap:6px"></span>
+    <span class="hint" data-i="procHint">Form anklicken zum Hinzufügen · Doppelklick = umbenennen · Hintergrund ziehen = verschieben · Mausrad = Zoom</span>
+  </div>
+
+  <!-- Kanban-Toolbar -->
+  <div class="toolbar" id="kanTools" style="display:none">
+    <span class="hint" data-i="kanHint">Karte anklicken zum Bearbeiten · ziehen zwischen Spalten</span>
+  </div>
+
+  <main>
+    <!-- Prozess-Canvas -->
+    <div id="canvasWrap" style="display:none">
+      <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"></path>
+          </marker>
+          <marker id="arrowSel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+          </marker>
+        </defs>
+        <g id="scene">
+          <g id="edges"></g>
+          <g id="nodes"></g>
+        </g>
+      </svg>
+      <textarea id="nodeEditor" rows="2"></textarea>
+      <div class="connect-badge" id="connectBadge" data-i="connectBadge">Verbinden: Start-Element anklicken…</div>
+      <div class="zoombar">
+        <button id="zIn">＋</button>
+        <button id="zOut">－</button>
+        <button id="zFit" title="" data-i="fit">⤢</button>
+      </div>
+    </div>
+
+    <!-- Kanban -->
+    <div id="kanban" style="display:none"></div>
+  </main>
+</div>
+
+<!-- Karte bearbeiten -->
+<div class="overlay" id="cardOverlay">
+  <div class="modal">
+    <h3 id="cardModalTitle" data-i="editCard">Karte bearbeiten</h3>
+    <label data-i="fTitle">Titel</label>
+    <input id="cTitle">
+    <label data-i="fDesc">Beschreibung</label>
+    <textarea id="cDesc"></textarea>
+    <div style="display:flex;gap:12px">
+      <div style="flex:1"><label data-i="fAssignee">Zuständig</label><input id="cAssignee"></div>
+      <div style="flex:1"><label data-i="fLabel">Label</label><input id="cLabel"></div>
+    </div>
+    <div class="actions">
+      <button id="cDelete" style="color:#d64545" data-i="delete">Löschen</button>
+      <span class="sp"></span>
+      <button id="cCancel" data-i="cancel">Abbrechen</button>
+      <button class="primary" id="cSave" data-i="save">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Neues Board -->
+<div class="overlay" id="boardOverlay">
+  <div class="modal">
+    <h3 data-i="newBoardT">Neues Board</h3>
+    <label data-i="fName">Name</label>
+    <input id="bName" placeholder="z. B. Kermi Re-Engagement Prozess">
+    <label data-i="fType">Typ</label>
+    <div class="radio" id="bType">
+      <label class="sel"><input type="radio" name="btype" value="process" checked> <span data-i="typeProcess">Prozess-Canvas</span></label>
+      <label><input type="radio" name="btype" value="kanban"> <span data-i="typeKanban">Kanban</span></label>
+    </div>
+    <div class="actions">
+      <span class="sp"></span>
+      <button id="bCancel" data-i="cancel">Abbrechen</button>
+      <button class="primary" id="bCreate" data-i="create">Anlegen</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   CONFIG  — dein Supabase-Projekt. Der publishable Key ist oeffentlich
+   unbedenklich; die Daten schuetzt der Zugangskey (DB-seitig via RPC).
+   ============================================================ */
+const CONFIG = {
+  url: "https://sajbfjnsyghzjmaadykh.supabase.co",
+  publishableKey: "sb_publishable_thLUmKMS42OembdXHFchrw_DOt2J4W6"
+};
+
+/* ---------------- i18n ---------------- */
+const I18N = {
+  de:{wb:"Workboard",gateHint:"Bitte Zugangskey eingeben.",gatePh:"Zugangskey",enter:"Öffnen",
+      remember:"Auf diesem Gerät merken",newBoard:"+ Board",rename:"Umbenennen",delete:"Löschen",
+      lock:"Sperren",shRect:"▭ Prozess",shRounded:"▢ Aktion",shDecision:"◇ Entscheidung",
+      shStart:"⬭ Start/Ende",shNote:"▤ Notiz",connect:"↳ Verbinden",delSel:"Löschen",
+      procHint:"Form anklicken zum Hinzufügen · Doppelklick = umbenennen · Hintergrund ziehen = verschieben · Mausrad = Zoom",
+      kanHint:"Karte anklicken zum Bearbeiten · ziehen zwischen Spalten",fit:"Einpassen",
+      connectBadge:"Verbinden: Start-Element anklicken…",connectBadge2:"Verbinden: Ziel-Element anklicken (Esc = Abbruch)",
+      editCard:"Karte bearbeiten",fTitle:"Titel",fDesc:"Beschreibung",fAssignee:"Zuständig",fLabel:"Label",
+      cancel:"Abbrechen",save:"Speichern",create:"Anlegen",newBoardT:"Neues Board",fName:"Name",fType:"Typ",
+      typeProcess:"Prozess-Canvas",typeKanban:"Kanban",addCard:"+ Karte",
+      colBacklog:"Backlog",colInprogress:"In Arbeit",colReview:"Review",colDone:"Fertig",
+      badKey:"Zugangskey ist falsch.",noBoards:"Noch kein Board — lege eins an.",
+      confirmDelBoard:"Dieses Board mit allen Inhalten löschen?",promptRename:"Neuer Board-Name:",
+      newProcess:"Mein Prozess",newKanban:"Mein Kanban"},
+  en:{wb:"Workboard",gateHint:"Please enter the access key.",gatePh:"Access key",enter:"Open",
+      remember:"Remember on this device",newBoard:"+ Board",rename:"Rename",delete:"Delete",
+      lock:"Lock",shRect:"▭ Process",shRounded:"▢ Action",shDecision:"◇ Decision",
+      shStart:"⬭ Start/End",shNote:"▤ Note",connect:"↳ Connect",delSel:"Delete",
+      procHint:"Click a shape to add · double-click = rename · drag background = pan · wheel = zoom",
+      kanHint:"Click a card to edit · drag between columns",fit:"Fit",
+      connectBadge:"Connect: click the start element…",connectBadge2:"Connect: click the target element (Esc = cancel)",
+      editCard:"Edit card",fTitle:"Title",fDesc:"Description",fAssignee:"Assignee",fLabel:"Label",
+      cancel:"Cancel",save:"Save",create:"Create",newBoardT:"New board",fName:"Name",fType:"Type",
+      typeProcess:"Process canvas",typeKanban:"Kanban",addCard:"+ Card",
+      colBacklog:"Backlog",colInprogress:"In progress",colReview:"Review",colDone:"Done",
+      badKey:"Access key is incorrect.",noBoards:"No board yet — create one.",
+      confirmDelBoard:"Delete this board and all its contents?",promptRename:"New board name:",
+      newProcess:"My process",newKanban:"My kanban"}
+};
+let LANG = lsGet("wb_lang") || "de";
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || (I18N.de[k]) || k; }
+function applyI18n(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-i]").forEach(el=>{ el.textContent = t(el.getAttribute("data-i")); });
+  document.querySelectorAll("[data-ph]").forEach(el=>{ el.placeholder = t(el.getAttribute("data-ph")); });
+  document.getElementById("langBtn").textContent = LANG==="de" ? "DE / EN" : "EN / DE";
+  if(boardType==="kanban") renderKanban();
+}
+
+/* ---------------- localStorage (sicher gekapselt) ---------------- */
+function lsGet(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
+function lsSet(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
+function lsDel(k){ try{localStorage.removeItem(k);}catch(e){} }
+
+/* ---------------- Farben & Formen ---------------- */
+const COLORS = {
+  blue:{fill:"#e8efff",stroke:"#3b66e0",text:"#17306b"},
+  green:{fill:"#e6f7ec",stroke:"#2fa360",text:"#14532d"},
+  amber:{fill:"#fef4e2",stroke:"#d9900a",text:"#7a4b00"},
+  red:{fill:"#fdeaea",stroke:"#d64545",text:"#7a1f1f"},
+  purple:{fill:"#f1e9fe",stroke:"#8b4fe0",text:"#4a2191"},
+  teal:{fill:"#e2f6f4",stroke:"#199e92",text:"#0c4f49"},
+  gray:{fill:"#eef1f4",stroke:"#7a8694",text:"#2b3440"}
+};
+const COLOR_ORDER = ["blue","green","amber","red","purple","teal","gray"];
+const SVGNS = "http://www.w3.org/2000/svg";
+
+/* ---------------- State ---------------- */
+let sb = null;
+let KEY = null;
+let boards = [];
+let boardId = null;
+let boardType = "process";
+let state = { nodes:{}, edges:{}, cards:{} };
+let selColor = "blue";
+let selection = null;          // {kind:'node'|'edge', id}
+let connectMode = false, connectSource = null;
+let view = { tx:80, ty:60, scale:1 };
+let busy = false;              // true waehrend Interaktion -> Poll pausiert
+let lastWrite = 0, lastSig = "";
+let editingCardId = null;
+
+/* ============================================================
+   Supabase-RPC
+   ============================================================ */
+async function rpc(fn, args){
+  const { data, error } = await sb.rpc(fn, args);
+  if(error){ throw error; }
+  return data;
+}
+function setDot(cls){ const d=document.getElementById("syncDot"); d.className="dot "+(cls||""); }
+
+/* ============================================================
+   Auth / Gate
+   ============================================================ */
+async function tryKey(key){
+  sb = window.supabase.createClient(CONFIG.url, CONFIG.publishableKey, { auth:{persistSession:false} });
+  KEY = key;
+  await rpc("wb_boards_list", { p_key:key });   // wirft bei falschem Key
+}
+async function doGate(){
+  const key = document.getElementById("gateKey").value.trim();
+  const err = document.getElementById("gateErr");
+  err.textContent = "";
+  if(!key) return;
+  try{
+    setDot("sync");
+    await tryKey(key);
+    if(document.getElementById("gateRemember").checked) lsSet("wb_key", key);
+    document.getElementById("gate").style.display="none";
+    document.getElementById("app").style.display="flex";
+    setDot("ok");
+    await initApp();
+  }catch(e){
+    setDot("err");
+    err.textContent = t("badKey");
+    lsDel("wb_key");
+  }
+}
+
+/* ============================================================
+   Boards
+   ============================================================ */
+async function initApp(){
+  await loadBoards();
+  let want = lsGet("wb_board");
+  if(!want || !boards.find(b=>b.id===want)) want = boards[0] ? boards[0].id : null;
+  if(want){ await selectBoard(want); }
+  else { renderEmpty(); }
+  startPolling();
+}
+async function loadBoards(){
+  boards = await rpc("wb_boards_list", { p_key:KEY }) || [];
+  const sel = document.getElementById("boardSel");
+  sel.innerHTML = "";
+  boards.forEach(b=>{
+    const o=document.createElement("option");
+    o.value=b.id; o.textContent=(b.type==="kanban"?"▦ ":"◇ ")+b.name;
+    sel.appendChild(o);
+  });
+  if(boardId) sel.value = boardId;
+}
+async function selectBoard(id){
+  boardId = id; lsSet("wb_board", id);
+  const b = boards.find(x=>x.id===id); boardType = b ? b.type : "process";
+  document.getElementById("boardSel").value = id;
+  document.getElementById("procTools").style.display = boardType==="process"?"flex":"none";
+  document.getElementById("kanTools").style.display  = boardType==="kanban"?"flex":"none";
+  document.getElementById("canvasWrap").style.display= boardType==="process"?"block":"none";
+  document.getElementById("kanban").style.display    = boardType==="kanban"?"flex":"none";
+  selection=null; connectMode=false; connectSource=null; updateConnectUI();
+  await reload(true);
+}
+function renderEmpty(){
+  document.getElementById("canvasWrap").style.display="none";
+  document.getElementById("kanban").style.display="none";
+  document.getElementById("procTools").style.display="none";
+  document.getElementById("kanTools").style.display="none";
+}
+
+/* ============================================================
+   Laden / Sync
+   ============================================================ */
+async function reload(fit){
+  if(!boardId) return;
+  const data = await rpc("wb_load", { p_key:KEY, p_board:boardId });
+  applyServer(data);
+  lastSig = JSON.stringify(data);
+  if(fit && boardType==="process") fitView();
+}
+function applyServer(data){
+  state = { nodes:{}, edges:{}, cards:{} };
+  (data.nodes||[]).forEach(n=> state.nodes[n.id]=n);
+  (data.edges||[]).forEach(e=> state.edges[e.id]=e);
+  (data.cards||[]).forEach(c=> state.cards[c.id]=c);
+  if(boardType==="process") renderCanvas(); else renderKanban();
+}
+let pollTimer=null;
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async ()=>{
+    if(!boardId || busy) return;
+    if(Date.now()-lastWrite < 1500) return;
+    try{
+      setDot("sync");
+      const data = await rpc("wb_load", { p_key:KEY, p_board:boardId });
+      const sig = JSON.stringify(data);
+      if(sig!==lastSig){ lastSig=sig; applyServer(data); }
+      setDot("ok");
+    }catch(e){ setDot("err"); }
+  }, 4000);
+}
+function touch(){ lastWrite = Date.now(); }
+
+/* ============================================================
+   Prozess-Canvas  —  Rendering
+   ============================================================ */
+function sceneTransform(){ document.getElementById("scene").setAttribute("transform",
+  `translate(${view.tx} ${view.ty}) scale(${view.scale})`); }
+
+function renderCanvas(){
+  sceneTransform();
+  const gN=document.getElementById("nodes"), gE=document.getElementById("edges");
+  gN.innerHTML=""; gE.innerHTML="";
+  Object.values(state.edges).forEach(e=> gE.appendChild(edgeEl(e)));
+  Object.values(state.nodes).forEach(n=> gN.appendChild(nodeEl(n)));
+}
+function nodeCenter(n){ return { x:n.x+n.w/2, y:n.y+n.h/2 }; }
+function borderPoint(n, toward){
+  const c=nodeCenter(n); let dx=toward.x-c.x, dy=toward.y-c.y;
+  if(dx===0&&dy===0) return c;
+  const hw=n.w/2, hh=n.h/2;
+  const tt=1/Math.max(Math.abs(dx)/hw, Math.abs(dy)/hh);
+  return { x:c.x+dx*tt, y:c.y+dy*tt };
+}
+function edgeEl(e){
+  const a=state.nodes[e.source_id], b=state.nodes[e.target_id];
+  const g=document.createElementNS(SVGNS,"g"); g.setAttribute("class","edge"+(isSel('edge',e.id)?" sel":"")); g.dataset.id=e.id;
+  if(!a||!b) return g;
+  const p1=borderPoint(a,nodeCenter(b)), p2=borderPoint(b,nodeCenter(a));
+  const d=`M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`;
+  const hit=document.createElementNS(SVGNS,"path"); hit.setAttribute("class","edge-hit"); hit.setAttribute("d",d);
+  const path=document.createElementNS(SVGNS,"path"); path.setAttribute("class","edge-path"); path.setAttribute("d",d);
+  path.setAttribute("marker-end", isSel('edge',e.id)?"url(#arrowSel)":"url(#arrow)");
+  g.appendChild(hit); g.appendChild(path);
+  if(e.label){
+    const mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2;
+    const bg=document.createElementNS(SVGNS,"rect");
+    const tw=e.label.length*6.6+8;
+    bg.setAttribute("x",mx-tw/2); bg.setAttribute("y",my-10); bg.setAttribute("width",tw); bg.setAttribute("height",18);
+    bg.setAttribute("rx",5); bg.setAttribute("fill","var(--panel)"); bg.setAttribute("stroke","var(--line)");
+    const tx=document.createElementNS(SVGNS,"text"); tx.setAttribute("class","edge-label");
+    tx.setAttribute("x",mx); tx.setAttribute("y",my+4); tx.setAttribute("text-anchor","middle"); tx.textContent=e.label;
+    g.appendChild(bg); g.appendChild(tx);
+  }
+  hit.addEventListener("click",ev=>{ ev.stopPropagation(); select('edge',e.id); });
+  hit.addEventListener("dblclick",ev=>{ ev.stopPropagation(); editEdgeLabel(e); });
+  return g;
+}
+function shapeEl(n){
+  const col=COLORS[n.color]||COLORS.blue;
+  let s;
+  if(n.shape==="decision"){
+    s=document.createElementNS(SVGNS,"polygon");
+    s.setAttribute("points",`${n.w/2},0 ${n.w},${n.h/2} ${n.w/2},${n.h} 0,${n.h/2}`);
+  }else{
+    s=document.createElementNS(SVGNS,"rect");
+    s.setAttribute("width",n.w); s.setAttribute("height",n.h);
+    if(n.shape==="rounded") s.setAttribute("rx",14);
+    else if(n.shape==="startend") s.setAttribute("rx",n.h/2);
+    else s.setAttribute("rx",4);
+  }
+  s.setAttribute("class","node-shape");
+  s.setAttribute("fill", n.shape==="note" ? "#fff9db" : col.fill);
+  s.setAttribute("stroke", n.shape==="note" ? "#e3c35a" : col.stroke);
+  s.setAttribute("stroke-width", n.shape==="note"?1.5:2);
+  if(n.shape==="note") s.setAttribute("stroke-dasharray","1 0");
+  return s;
+}
+function nodeEl(n){
+  const col=COLORS[n.color]||COLORS.blue;
+  const g=document.createElementNS(SVGNS,"g");
+  g.setAttribute("class","node"+(isSel('node',n.id)?" sel":"")); g.dataset.id=n.id;
+  g.setAttribute("transform",`translate(${n.x} ${n.y})`);
+  g.appendChild(shapeEl(n));
+  const fo=document.createElementNS(SVGNS,"foreignObject");
+  fo.setAttribute("x",0); fo.setAttribute("y",0); fo.setAttribute("width",n.w); fo.setAttribute("height",n.h);
+  const div=document.createElement("div"); div.style.color=(n.shape==="note")?"#5a4a10":col.text;
+  div.textContent=n.text||""; fo.appendChild(div); g.appendChild(fo);
+  attachNodeHandlers(g,n);
+  return g;
+}
+
+/* ---------------- Canvas-Interaktion ---------------- */
+function screenToScene(clientX,clientY){
+  const r=document.getElementById("canvasWrap").getBoundingClientRect();
+  return { x:(clientX-r.left-view.tx)/view.scale, y:(clientY-r.top-view.ty)/view.scale };
+}
+function attachNodeHandlers(g,n){
+  const shape=g.querySelector(".node-shape"), fo=g.querySelector("foreignObject");
+  let moved=false, start=null, orig=null;
+  function down(ev){
+    if(connectMode){ ev.stopPropagation(); handleConnectClick(n); return; }
+    if(ev.button!==0) return;
+    ev.stopPropagation();
+    select('node',n.id);
+    busy=true; moved=false;
+    start=screenToScene(ev.clientX,ev.clientY); orig={x:n.x,y:n.y};
+    g.classList.add("dragging");
+    g.setPointerCapture && g.setPointerCapture(ev.pointerId);
+    g.addEventListener("pointermove",move);
+    g.addEventListener("pointerup",up);
+  }
+  function move(ev){
+    const p=screenToScene(ev.clientX,ev.clientY);
+    const nx=orig.x+(p.x-start.x), ny=orig.y+(p.y-start.y);
+    if(Math.abs(nx-orig.x)+Math.abs(ny-orig.y)>2) moved=true;
+    n.x=nx; n.y=ny; g.setAttribute("transform",`translate(${nx} ${ny})`);
+    updateEdgesFor(n.id);
+  }
+  function up(ev){
+    g.classList.remove("dragging");
+    g.removeEventListener("pointermove",move); g.removeEventListener("pointerup",up);
+    busy=false;
+    if(moved){ saveNode(n); }
+  }
+  shape.addEventListener("pointerdown",down);
+  fo.addEventListener("pointerdown",down);
+  g.addEventListener("dblclick",ev=>{ ev.stopPropagation(); if(!connectMode) editNodeText(n); });
+}
+function updateEdgesFor(nodeId){
+  document.querySelectorAll("#edges .edge").forEach(g=>{
+    const e=state.edges[g.dataset.id]; if(!e) return;
+    if(e.source_id===nodeId||e.target_id===nodeId){
+      const fresh=edgeEl(e); g.replaceWith(fresh);
+    }
+  });
+}
+function isSel(kind,id){ return selection && selection.kind===kind && selection.id===id; }
+function select(kind,id){ selection={kind,id}; if(boardType==="process") renderCanvas(); }
+function clearSelection(){ selection=null; if(boardType==="process") renderCanvas(); }
+
+/* Pan + Zoom + Hintergrund-Klick */
+(function canvasBg(){
+  const wrap=document.getElementById("canvasWrap");
+  let panning=false,sx,sy,otx,oty;
+  wrap.addEventListener("pointerdown",ev=>{
+    if(ev.target.closest(".node")||ev.target.closest(".edge")) return;
+    if(connectMode){ return; }
+    panning=true; busy=true; sx=ev.clientX; sy=ev.clientY; otx=view.tx; oty=view.ty;
+    wrap.setPointerCapture(ev.pointerId); clearSelection();
+  });
+  wrap.addEventListener("pointermove",ev=>{
+    if(!panning)return; view.tx=otx+(ev.clientX-sx); view.ty=oty+(ev.clientY-sy); sceneTransform();
+  });
+  wrap.addEventListener("pointerup",ev=>{ panning=false; busy=false; });
+  wrap.addEventListener("wheel",ev=>{
+    ev.preventDefault();
+    const r=wrap.getBoundingClientRect(); const cx=ev.clientX-r.left, cy=ev.clientY-r.top;
+    const factor=ev.deltaY<0?1.1:1/1.1;
+    const ns=Math.min(2.5,Math.max(0.25,view.scale*factor));
+    const wx=(cx-view.tx)/view.scale, wy=(cy-view.ty)/view.scale;
+    view.scale=ns; view.tx=cx-wx*ns; view.ty=cy-wy*ns; sceneTransform();
+  },{passive:false});
+})();
+function fitView(){
+  const ns=Object.values(state.nodes); const wrap=document.getElementById("canvasWrap").getBoundingClientRect();
+  if(!ns.length){ view={tx:80,ty:60,scale:1}; sceneTransform(); return; }
+  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  ns.forEach(n=>{ minx=Math.min(minx,n.x);miny=Math.min(miny,n.y);maxx=Math.max(maxx,n.x+n.w);maxy=Math.max(maxy,n.y+n.h);});
+  const bw=maxx-minx||1,bh=maxy-miny||1;
+  const s=Math.min(wrap.width/(bw+120), wrap.height/(bh+120), 1.4);
+  view.scale=Math.max(0.25,s);
+  view.tx=(wrap.width-bw*view.scale)/2 - minx*view.scale;
+  view.ty=(wrap.height-bh*view.scale)/2 - miny*view.scale;
+  sceneTransform();
+}
+
+/* Knoten hinzufuegen */
+function addNode(shape){
+  const wrap=document.getElementById("canvasWrap").getBoundingClientRect();
+  const center=screenToScene(wrap.left+wrap.width/2, wrap.top+wrap.height/2);
+  const w = shape==="decision"?150:170, h = shape==="decision"?90:(shape==="startend"?56:70);
+  const n={ id:crypto.randomUUID(), board_id:boardId, x:Math.round(center.x-w/2+ (Math.random()*40-20)),
+            y:Math.round(center.y-h/2+(Math.random()*40-20)), w, h, text:"", color:selColor, shape };
+  state.nodes[n.id]=n; select('node',n.id); saveNode(n);
+  setTimeout(()=>editNodeText(n),30);
+}
+async function saveNode(n){
+  touch();
+  try{ await rpc("wb_node_upsert",{p_key:KEY,p_board:boardId,p:{
+    id:n.id,x:n.x,y:n.y,w:n.w,h:n.h,text:n.text,color:n.color,shape:n.shape}}); }catch(e){ setDot("err"); }
+}
+async function deleteNode(id){
+  delete state.nodes[id];
+  Object.values(state.edges).forEach(e=>{ if(e.source_id===id||e.target_id===id) delete state.edges[e.id]; });
+  selection=null; renderCanvas(); touch();
+  try{ await rpc("wb_node_delete",{p_key:KEY,p_board:boardId,p_id:id}); }catch(e){ setDot("err"); }
+}
+async function saveEdge(e){
+  touch();
+  try{ await rpc("wb_edge_upsert",{p_key:KEY,p_board:boardId,p:{
+    id:e.id,source_id:e.source_id,target_id:e.target_id,label:e.label||""}}); }catch(err){ setDot("err"); }
+}
+async function deleteEdge(id){
+  delete state.edges[id]; selection=null; renderCanvas(); touch();
+  try{ await rpc("wb_edge_delete",{p_key:KEY,p_board:boardId,p_id:id}); }catch(e){ setDot("err"); }
+}
+
+/* Text bearbeiten (Knoten) */
+function editNodeText(n){
+  busy=true;
+  const ed=document.getElementById("nodeEditor");
+  const col=COLORS[n.color]||COLORS.blue;
+  ed.style.display="block";
+  ed.style.left=(view.tx+n.x*view.scale)+"px";
+  ed.style.top =(view.ty+n.y*view.scale)+"px";
+  ed.style.width=(n.w*view.scale)+"px";
+  ed.style.height=(n.h*view.scale)+"px";
+  ed.style.color=(n.shape==="note")?"#5a4a10":col.text;
+  ed.value=n.text||""; ed.focus(); ed.select();
+  function commit(){
+    ed.removeEventListener("blur",commit); ed.removeEventListener("keydown",key);
+    ed.style.display="none"; busy=false;
+    const v=ed.value;
+    if(v!==n.text){ n.text=v; renderCanvas(); saveNode(n); }
+  }
+  function key(ev){
+    if(ev.key==="Enter"&&!ev.shiftKey){ ev.preventDefault(); ed.blur(); }
+    if(ev.key==="Escape"){ ed.value=n.text||""; ed.blur(); }
+  }
+  ed.addEventListener("blur",commit); ed.addEventListener("keydown",key);
+}
+function editEdgeLabel(e){
+  const v=window.prompt(t("fLabel")+":", e.label||"");
+  if(v===null) return; e.label=v; renderCanvas(); saveEdge(e);
+}
+
+/* Verbinden */
+function updateConnectUI(){
+  const btn=document.getElementById("connectBtn"), badge=document.getElementById("connectBadge");
+  btn.classList.toggle("active",connectMode);
+  badge.style.display=connectMode?"block":"none";
+  badge.textContent=connectSource? t("connectBadge2") : t("connectBadge");
+  document.getElementById("canvas").style.cursor=connectMode?"crosshair":"";
+}
+function toggleConnect(){ connectMode=!connectMode; connectSource=null; updateConnectUI(); }
+function handleConnectClick(n){
+  if(!connectSource){ connectSource=n.id; updateConnectUI(); select('node',n.id); return; }
+  if(connectSource===n.id){ return; }
+  const e={ id:crypto.randomUUID(), board_id:boardId, source_id:connectSource, target_id:n.id, label:"" };
+  state.edges[e.id]=e; connectSource=null; connectMode=false; updateConnectUI(); renderCanvas(); saveEdge(e);
+}
+
+/* Palette */
+function buildPalette(){
+  const p=document.getElementById("palette"); p.innerHTML="";
+  COLOR_ORDER.forEach(c=>{
+    const s=document.createElement("span"); s.className="swatch"+(c===selColor?" sel":"");
+    s.style.background=COLORS[c].stroke; s.title=c;
+    s.addEventListener("click",()=>{
+      selColor=c; buildPalette();
+      if(selection&&selection.kind==='node'){ const n=state.nodes[selection.id]; if(n){ n.color=c; renderCanvas(); saveNode(n);} }
+    });
+    p.appendChild(s);
+  });
+}
+
+/* ============================================================
+   Kanban
+   ============================================================ */
+const KCOLS=[["backlog","colBacklog"],["inprogress","colInprogress"],["review","colReview"],["done","colDone"]];
+function renderKanban(){
+  const root=document.getElementById("kanban"); root.innerHTML="";
+  KCOLS.forEach(([key,i18n])=>{
+    const col=document.createElement("div"); col.className="col"; col.dataset.col=key;
+    const list=Object.values(state.cards).filter(c=>c.col===key).sort((a,b)=>a.pos-b.pos);
+    const h=document.createElement("h3");
+    h.innerHTML=`<span>${t(i18n)}</span><span class="count">${list.length}</span>`;
+    col.appendChild(h);
+    const cards=document.createElement("div"); cards.className="cards";
+    list.forEach(c=> cards.appendChild(kcardEl(c)));
+    col.appendChild(cards);
+    const add=document.createElement("button"); add.className="add"; add.textContent=t("addCard");
+    add.addEventListener("click",()=> newCard(key));
+    col.appendChild(add);
+    // Drop-Ziele
+    col.addEventListener("dragover",ev=>{ ev.preventDefault(); col.classList.add("drop"); });
+    col.addEventListener("dragleave",()=> col.classList.remove("drop"));
+    col.addEventListener("drop",ev=>{
+      ev.preventDefault(); col.classList.remove("drop");
+      const id=ev.dataTransfer.getData("text/plain"); moveCard(id,key);
+    });
+    root.appendChild(col);
+  });
+}
+function kcardEl(c){
+  const el=document.createElement("div"); el.className="kcard"; el.draggable=true; el.dataset.id=c.id;
+  let meta="";
+  if(c.assignee) meta+=`<span class="chip assignee">${esc(c.assignee)}</span>`;
+  if(c.label) meta+=`<span class="chip">${esc(c.label)}</span>`;
+  el.innerHTML=`<div class="t">${esc(c.title)||"—"}</div>`+
+               (c.description?`<div class="d">${esc(c.description)}</div>`:"")+
+               (meta?`<div class="meta">${meta}</div>`:"");
+  el.addEventListener("click",()=> openCard(c.id));
+  el.addEventListener("dragstart",ev=>{ busy=true; ev.dataTransfer.setData("text/plain",c.id); });
+  el.addEventListener("dragend",()=>{ busy=false; });
+  return el;
+}
+function newCard(col){
+  const c={ id:crypto.randomUUID(), board_id:boardId, col, title:"", description:"", assignee:"", label:"",
+            pos:Date.now() };
+  state.cards[c.id]=c; openCard(c.id);
+}
+async function moveCard(id,col){
+  const c=state.cards[id]; if(!c) return; c.col=col; c.pos=Date.now(); renderKanban(); touch();
+  await saveCard(c);
+}
+async function saveCard(c){
+  touch();
+  try{ await rpc("wb_card_upsert",{p_key:KEY,p_board:boardId,p:{
+    id:c.id,col:c.col,title:c.title,description:c.description,assignee:c.assignee,label:c.label,pos:c.pos}}); }
+  catch(e){ setDot("err"); }
+}
+async function deleteCard(id){
+  delete state.cards[id]; renderKanban(); touch();
+  try{ await rpc("wb_card_delete",{p_key:KEY,p_board:boardId,p_id:id}); }catch(e){ setDot("err"); }
+}
+function openCard(id){
+  const c=state.cards[id]; if(!c) return; editingCardId=id;
+  document.getElementById("cTitle").value=c.title||"";
+  document.getElementById("cDesc").value=c.description||"";
+  document.getElementById("cAssignee").value=c.assignee||"";
+  document.getElementById("cLabel").value=c.label||"";
+  document.getElementById("cardOverlay").classList.add("show");
+  document.getElementById("cTitle").focus();
+}
+function closeCard(){ document.getElementById("cardOverlay").classList.remove("show"); editingCardId=null; }
+
+/* ============================================================
+   Board-Verwaltung
+   ============================================================ */
+function openNewBoard(){ document.getElementById("bName").value=""; document.getElementById("boardOverlay").classList.add("show"); document.getElementById("bName").focus(); }
+async function createBoard(){
+  const name=document.getElementById("bName").value.trim();
+  const type=document.querySelector('input[name="btype"]:checked').value;
+  const b=await rpc("wb_board_create",{p_key:KEY,p_name:name||(type==="kanban"?t("newKanban"):t("newProcess")),p_type:type});
+  document.getElementById("boardOverlay").classList.remove("show");
+  await loadBoards(); await selectBoard(b.id);
+}
+async function renameBoard(){
+  if(!boardId) return; const b=boards.find(x=>x.id===boardId);
+  const name=window.prompt(t("promptRename"), b?b.name:"");
+  if(name===null) return;
+  await rpc("wb_board_rename",{p_key:KEY,p_board:boardId,p_name:name});
+  await loadBoards();
+}
+async function delBoard(){
+  if(!boardId) return;
+  if(!window.confirm(t("confirmDelBoard"))) return;
+  await rpc("wb_board_delete",{p_key:KEY,p_board:boardId});
+  const old=boardId; boardId=null;
+  await loadBoards();
+  if(boards[0]) await selectBoard(boards[0].id); else { renderEmpty(); }
+}
+
+/* ============================================================
+   Globale Events / Wiring
+   ============================================================ */
+document.getElementById("gateGo").addEventListener("click",doGate);
+document.getElementById("gateKey").addEventListener("keydown",e=>{ if(e.key==="Enter") doGate(); });
+
+document.getElementById("boardSel").addEventListener("change",e=> selectBoard(e.target.value));
+document.getElementById("newBoard").addEventListener("click",openNewBoard);
+document.getElementById("renameBoard").addEventListener("click",renameBoard);
+document.getElementById("delBoard").addEventListener("click",delBoard);
+document.getElementById("langBtn").addEventListener("click",()=>{ LANG=LANG==="de"?"en":"de"; lsSet("wb_lang",LANG); applyI18n(); updateConnectUI(); });
+document.getElementById("lockBtn").addEventListener("click",()=>{ lsDel("wb_key"); location.reload(); });
+
+document.querySelectorAll("#procTools [data-shape]").forEach(b=>
+  b.addEventListener("click",()=> addNode(b.getAttribute("data-shape"))));
+document.getElementById("connectBtn").addEventListener("click",toggleConnect);
+document.getElementById("delSel").addEventListener("click",()=>{
+  if(!selection) return; if(selection.kind==='node') deleteNode(selection.id); else deleteEdge(selection.id);
+});
+document.getElementById("zIn").addEventListener("click",()=>{ view.scale=Math.min(2.5,view.scale*1.15); sceneTransform(); });
+document.getElementById("zOut").addEventListener("click",()=>{ view.scale=Math.max(0.25,view.scale/1.15); sceneTransform(); });
+document.getElementById("zFit").addEventListener("click",fitView);
+
+document.addEventListener("keydown",e=>{
+  if(document.getElementById("nodeEditor").style.display==="block") return;
+  if(document.querySelector(".overlay.show")) { if(e.key==="Escape"){ closeCard(); document.getElementById("boardOverlay").classList.remove("show"); } return; }
+  if(e.key==="Escape"){ if(connectMode){ connectMode=false;connectSource=null;updateConnectUI(); } else clearSelection(); }
+  if((e.key==="Delete"||e.key==="Backspace") && selection && boardType==="process"){
+    if(document.activeElement.tagName==="INPUT"||document.activeElement.tagName==="TEXTAREA") return;
+    e.preventDefault();
+    if(selection.kind==='node') deleteNode(selection.id); else deleteEdge(selection.id);
+  }
+});
+
+// Card-Modal
+document.getElementById("cCancel").addEventListener("click",closeCard);
+document.getElementById("cSave").addEventListener("click",()=>{
+  const c=state.cards[editingCardId]; if(!c){ closeCard(); return; }
+  c.title=document.getElementById("cTitle").value;
+  c.description=document.getElementById("cDesc").value;
+  c.assignee=document.getElementById("cAssignee").value;
+  c.label=document.getElementById("cLabel").value;
+  closeCard(); renderKanban(); saveCard(c);
+});
+document.getElementById("cDelete").addEventListener("click",()=>{ const id=editingCardId; closeCard(); if(id) deleteCard(id); });
+
+// Board-Modal
+document.getElementById("bCancel").addEventListener("click",()=> document.getElementById("boardOverlay").classList.remove("show"));
+document.getElementById("bCreate").addEventListener("click",createBoard);
+document.querySelectorAll('#bType label').forEach(l=>{
+  l.addEventListener("click",()=>{ document.querySelectorAll('#bType label').forEach(x=>x.classList.remove("sel")); l.classList.add("sel"); l.querySelector("input").checked=true; });
+});
+
+function esc(s){ return (s||"").replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+/* ---------------- Start ---------------- */
+applyI18n(); buildPalette(); updateConnectUI();
+(function autostart(){
+  const saved=lsGet("wb_key");
+  if(saved){
+    document.getElementById("gateKey").value=saved;
+    doGate();
+  }else{
+    document.getElementById("gateKey").focus();
+  }
+})();
+</script>
+</body>
+</html>
