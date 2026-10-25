@@ -90,6 +90,8 @@
      border-radius:8px;background:var(--bg);cursor:pointer}
   .shapeBtn:hover{border-color:var(--accent);background:var(--accent-soft)}
   .shapeBtn svg{display:block;width:40px;height:26px;pointer-events:none}
+  #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#d64545;color:#fff;
+     padding:10px 16px;border-radius:10px;box-shadow:var(--shadow);z-index:100;display:none;max-width:90vw;font-size:13px}
   .node foreignObject div{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
         text-align:center;padding:6px 8px;font-size:13px;line-height:1.25;overflow:hidden;word-break:break-word;pointer-events:none}
   .edge-path{fill:none;stroke:var(--muted);stroke-width:2}
@@ -267,6 +269,8 @@
   </div>
 </div>
 
+<div id="toast"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================================================
@@ -335,6 +339,23 @@ function applyI18n(){
 function lsGet(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
 function lsSet(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
 function lsDel(k){ try{localStorage.removeItem(k);}catch(e){} }
+
+/* Browserunabhaengige UUID (crypto.randomUUID fehlt z.B. in Safari bei file://) */
+function uid(){
+  try{ if(window.crypto && crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  let b;
+  try{ if(window.crypto && crypto.getRandomValues){ b=crypto.getRandomValues(new Uint8Array(16)); } }catch(e){}
+  if(!b){ b=new Uint8Array(16); for(let i=0;i<16;i++) b[i]=Math.floor(Math.random()*256); }
+  b[6]=(b[6]&0x0f)|0x40; b[8]=(b[8]&0x3f)|0x80;
+  const h=[...b].map(x=>x.toString(16).padStart(2,"0"));
+  return h[0]+h[1]+h[2]+h[3]+"-"+h[4]+h[5]+"-"+h[6]+h[7]+"-"+h[8]+h[9]+"-"+h[10]+h[11]+h[12]+h[13]+h[14]+h[15];
+}
+
+/* Sichtbare Fehleranzeige (ohne Konsole) */
+function showToast(msg){ const t=document.getElementById("toast"); if(!t) return;
+  t.textContent=msg; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>{t.style.display="none";},9000); }
+window.addEventListener("error",e=>showToast("Fehler: "+(e.message||"unbekannt")));
+window.addEventListener("unhandledrejection",e=>showToast("Fehler: "+((e.reason&&e.reason.message)||e.reason||"unbekannt")));
 
 /* ---------------- Farben & Formen ---------------- */
 const COLORS = {
@@ -852,7 +873,7 @@ function addNode(shape){
             parallelogram:[180,70],chevron:[170,70]};
   const [w,h]=SZ[shape]||[170,70];
   const nx=Math.round(center.x-w/2+(Math.random()*40-20)), ny=Math.round(center.y-h/2+(Math.random()*40-20));
-  const n={ id:crypto.randomUUID(), board_id:boardId, x:nx, y:ny, w, h, text:"", color:selColor, shape, fontsize:14 };
+  const n={ id:uid(), board_id:boardId, x:nx, y:ny, w, h, text:"", color:selColor, shape, fontsize:14 };
   state.nodes[n.id]=n; selection={kind:'node',id:n.id};
   // Falls stark herausgezoomt: Ansicht so setzen, dass der neue Knoten sichtbar ist
   if(view.scale<0.45 || view.scale>2.5){ view.scale=1; view.tx=wrap.width/2-(nx+w/2); view.ty=wrap.height/2-(ny+h/2); }
@@ -923,7 +944,7 @@ function toggleConnect(){ connectMode=!connectMode; connectSource=null; updateCo
 function handleConnectClick(n){
   if(!connectSource){ connectSource=n.id; updateConnectUI(); select('node',n.id); return; }
   if(connectSource===n.id){ connectSource=null; updateConnectUI(); return; }  // Abwahl
-  const e={ id:crypto.randomUUID(), board_id:boardId, source_id:connectSource, target_id:n.id, label:"" };
+  const e={ id:uid(), board_id:boardId, source_id:connectSource, target_id:n.id, label:"" };
   state.edges[e.id]=e;
   connectSource=null;               // Verbinden-Modus bleibt AN -> mehrere/gegenlaeufige Verbindungen
   updateConnectUI(); renderCanvas(); saveEdge(e);
@@ -1004,7 +1025,7 @@ function kcardEl(c){
   return el;
 }
 function newCard(col){
-  const c={ id:crypto.randomUUID(), board_id:boardId, col, title:"", description:"", assignee:"", label:"",
+  const c={ id:uid(), board_id:boardId, col, title:"", description:"", assignee:"", label:"",
             pos:Date.now() };
   state.cards[c.id]=c; openCard(c.id);
 }
