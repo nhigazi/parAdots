@@ -77,10 +77,6 @@
   .node.dragging .node-hit{cursor:grabbing}
   .node.sel .node-shape{stroke:var(--accent);stroke-width:3}
   .rhandle{fill:var(--panel);stroke:var(--accent);stroke-width:1.5;pointer-events:all}
-  .tile{fill:transparent;stroke:#d7dce5;stroke-width:1;stroke-dasharray:7 7;pointer-events:all;cursor:pointer}
-  .tile:hover{fill:rgba(59,102,224,.05)}
-  .tile.sel{fill:rgba(59,102,224,.10);stroke:var(--accent);stroke-width:2.5;stroke-dasharray:none}
-  .tile-label{font-size:13px;fill:#9aa3b2;pointer-events:none;font-family:Arial,sans-serif}
   #fontVal{font-size:12.5px}
   .node foreignObject div{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
         text-align:center;padding:6px 8px;font-size:13px;line-height:1.25;overflow:hidden;word-break:break-word;pointer-events:none}
@@ -181,8 +177,6 @@
     <button id="fontDec" data-title="fontSmaller">A−</button>
     <span id="fontVal" style="min-width:26px;text-align:center;color:var(--muted)">14</span>
     <button id="fontInc" data-title="fontBigger">A+</button>
-    <span class="sep"></span>
-    <button id="exportTile" data-i="exportTile">⤓ A3-Kachel als Bild</button>
     <span class="hint" data-i="procHint"></span>
   </div>
 
@@ -293,7 +287,7 @@ const I18N = {
       bold:"Fett",italic:"Kursiv",underline:"Unterstrichen",strike:"Durchgestrichen",upper:"Großschrift",
       fontSmaller:"Schrift kleiner",fontBigger:"Schrift größer",exportTile:"⤓ A3-Kachel als Bild",
       noTile:"Bitte zuerst eine A3-Kachel anklicken.",tileWord:"A3",
-      procHint:"Form = hinzufügen · Doppelklick = Text · Anfasser = Größe · Format-Buttons wirken auf die gewählte Box · Kachel anklicken → als Bild"},
+      procHint:"Form = hinzufügen · Doppelklick = Text · Anfasser = Größe · Format-Buttons wirken auf die gewählte Box · Mausrad = Zoom"},
   en:{wb:"Workboard",gateHint:"Please enter the access key.",gatePh:"Access key",enter:"Open",
       remember:"Remember on this device",newBoard:"+ Board",rename:"Rename",delete:"Delete",
       lock:"Lock",shRect:"▭ Process",shRounded:"▢ Action",shDecision:"◇ Decision",
@@ -311,7 +305,7 @@ const I18N = {
       bold:"Bold",italic:"Italic",underline:"Underline",strike:"Strikethrough",upper:"Uppercase",
       fontSmaller:"Smaller text",fontBigger:"Larger text",exportTile:"⤓ Save A3 tile as image",
       noTile:"Please click an A3 tile first.",tileWord:"A3",
-      procHint:"Shape = add · double-click = text · handles = resize · format buttons act on the selected box · click a tile → save as image"}
+      procHint:"Shape = add · double-click = text · handles = resize · format buttons act on the selected box · wheel = zoom"}
 };
 let LANG = lsGet("wb_lang") || "de";
 function t(k){ return (I18N[LANG] && I18N[LANG][k]) || (I18N.de[k]) || k; }
@@ -753,11 +747,15 @@ function clearSelection(){ selection=null; if(boardType==="process") refreshSele
   },{passive:false});
 })();
 function fitView(){
-  const wrap=document.getElementById("canvasWrap").getBoundingClientRect();
-  const s=Math.min(wrap.width/(A0W+80), wrap.height/(A0H+80));
-  view.scale=Math.max(0.05,s);
-  view.tx=(wrap.width-A0W*view.scale)/2;
-  view.ty=(wrap.height-A0H*view.scale)/2;
+  const ns=Object.values(state.nodes); const wrap=document.getElementById("canvasWrap").getBoundingClientRect();
+  if(!ns.length){ view={tx:80,ty:60,scale:1}; sceneTransform(); renderHandles(); return; }
+  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  ns.forEach(n=>{ minx=Math.min(minx,n.x);miny=Math.min(miny,n.y);maxx=Math.max(maxx,n.x+n.w);maxy=Math.max(maxy,n.y+n.h);});
+  const bw=maxx-minx||1,bh=maxy-miny||1;
+  const s=Math.min(wrap.width/(bw+120), wrap.height/(bh+120), 1.6);
+  view.scale=Math.max(0.2,s);
+  view.tx=(wrap.width-bw*view.scale)/2 - minx*view.scale;
+  view.ty=(wrap.height-bh*view.scale)/2 - miny*view.scale;
   sceneTransform(); renderHandles();
 }
 
@@ -1001,7 +999,6 @@ document.getElementById("zFit").addEventListener("click",fitView);
 });
 document.getElementById("fontDec").addEventListener("click",()=>fontDelta(-2));
 document.getElementById("fontInc").addEventListener("click",()=>fontDelta(2));
-document.getElementById("exportTile").addEventListener("click",exportTile);
 
 document.addEventListener("keydown",e=>{
   if(document.getElementById("nodeEditor").style.display==="block") return;
