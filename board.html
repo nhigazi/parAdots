@@ -520,8 +520,8 @@ function renderCanvas(){
   sceneTransform();
   const gN=document.getElementById("nodes"), gE=document.getElementById("edges");
   gN.innerHTML=""; gE.innerHTML="";
-  Object.values(state.edges).forEach(e=> gE.appendChild(edgeEl(e)));
-  Object.values(state.nodes).forEach(n=> gN.appendChild(nodeEl(n)));
+  Object.values(state.edges).forEach(e=>{ try{ gE.appendChild(edgeEl(e)); }catch(err){ console.warn("edge render",err); } });
+  Object.values(state.nodes).forEach(n=>{ try{ gN.appendChild(nodeEl(n)); }catch(err){ console.warn("node render",err); } });
   renderHandles();
 }
 function nodeCenter(n){ return { x:n.x+n.w/2, y:n.y+n.h/2 }; }
@@ -853,7 +853,10 @@ function addNode(shape){
   const [w,h]=SZ[shape]||[170,70];
   const nx=Math.round(center.x-w/2+(Math.random()*40-20)), ny=Math.round(center.y-h/2+(Math.random()*40-20));
   const n={ id:crypto.randomUUID(), board_id:boardId, x:nx, y:ny, w, h, text:"", color:selColor, shape, fontsize:14 };
-  state.nodes[n.id]=n; selection={kind:'node',id:n.id}; renderCanvas(); updateFmtUI(); saveNode(n);
+  state.nodes[n.id]=n; selection={kind:'node',id:n.id};
+  // Falls stark herausgezoomt: Ansicht so setzen, dass der neue Knoten sichtbar ist
+  if(view.scale<0.45 || view.scale>2.5){ view.scale=1; view.tx=wrap.width/2-(nx+w/2); view.ty=wrap.height/2-(ny+h/2); }
+  renderCanvas(); updateFmtUI(); saveNode(n);
   setTimeout(()=>editNodeText(n),30);
 }
 async function saveNode(n){
