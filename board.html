@@ -204,7 +204,6 @@
           </marker>
         </defs>
         <g id="scene">
-          <g id="page"></g>
           <g id="edges"></g>
           <g id="nodes"></g>
           <g id="handles"></g>
@@ -342,9 +341,7 @@ const COLORS = {
 };
 const COLOR_ORDER = ["blue","green","amber","red","purple","teal","gray"];
 const SVGNS = "http://www.w3.org/2000/svg";
-const A0W=841, A0H=1189, TILE_COLS=2, TILE_ROWS=4;   // A0 hoch (mm), 8 A3-Kacheln (quer)
 const TEXT_FONT="Arial, Helvetica, sans-serif";
-const EXPORT_DPI=150;
 const _mctx=document.createElement("canvas").getContext("2d");
 
 /* ---------------- State ---------------- */
@@ -361,7 +358,6 @@ let view = { tx:80, ty:60, scale:1 };
 let busy = false;              // true waehrend Interaktion -> Poll pausiert
 let lastWrite = 0, lastSig = "";
 let editingCardId = null;
-let selTile = null;            // ausgewaehlte A3-Kachel (Index) fuer Bild-Export
 
 /* ============================================================
    Supabase-RPC
@@ -431,7 +427,7 @@ async function selectBoard(id){
   document.getElementById("kanTools").style.display  = boardType==="kanban"?"flex":"none";
   document.getElementById("canvasWrap").style.display= boardType==="process"?"block":"none";
   document.getElementById("kanban").style.display    = boardType==="kanban"?"flex":"none";
-  selection=null; selTile=null; connectMode=false; connectSource=null; updateConnectUI();
+  selection=null; connectMode=false; connectSource=null; updateConnectUI();
   await reload(true);
 }
 function renderEmpty(){
@@ -483,7 +479,6 @@ function sceneTransform(){ document.getElementById("scene").setAttribute("transf
 
 function renderCanvas(){
   sceneTransform();
-  renderPage();
   const gN=document.getElementById("nodes"), gE=document.getElementById("edges");
   gN.innerHTML=""; gE.innerHTML="";
   Object.values(state.edges).forEach(e=> gE.appendChild(edgeEl(e)));
@@ -635,9 +630,8 @@ function attachNodeHandlers(g,hit,n){
     try{ hit.setPointerCapture(ev.pointerId); }catch(e){}
     const move=(e2)=>{
       const p=screenToScene(e2.clientX,e2.clientY);
-      let nx=orig.x+(p.x-start.x), ny=orig.y+(p.y-start.y);
+      const nx=orig.x+(p.x-start.x), ny=orig.y+(p.y-start.y);
       if(Math.abs(nx-orig.x)+Math.abs(ny-orig.y)>2) moved=true;
-      nx=Math.max(0,Math.min(A0W-n.w,nx)); ny=Math.max(0,Math.min(A0H-n.h,ny));
       n.x=nx; n.y=ny; g.setAttribute("transform",`translate(${nx} ${ny})`);
       updateEdgesFor(n.id); repositionHandles(n);
     };
@@ -701,8 +695,6 @@ function applyResize(dir,orig,ddx,ddy,n){
   if(dir.indexOf("n")>=0){ h=orig.h-ddy; y=orig.y+ddy; }
   if(w<MINW){ if(dir.indexOf("w")>=0) x=orig.x+orig.w-MINW; w=MINW; }
   if(h<MINH){ if(dir.indexOf("n")>=0) y=orig.y+orig.h-MINH; h=MINH; }
-  w=Math.min(w,A0W); h=Math.min(h,A0H);
-  x=Math.max(0,Math.min(A0W-w,x)); y=Math.max(0,Math.min(A0H-h,y));
   n.x=x; n.y=y; n.w=w; n.h=h;
 }
 function attachResize(h,dir,n){
@@ -773,11 +765,9 @@ function fitView(){
 function addNode(shape){
   const wrap=document.getElementById("canvasWrap").getBoundingClientRect();
   const center=screenToScene(wrap.left+wrap.width/2, wrap.top+wrap.height/2);
-  const w = shape==="startend"?46:42;                                 // ~9 nebeneinander pro A3-Reihe
-  const h = shape==="decision"?30:(shape==="startend"?20:24);
-  let nx=Math.round(center.x-w/2+(Math.random()*24-12)), ny=Math.round(center.y-h/2+(Math.random()*24-12));
-  nx=Math.max(0,Math.min(A0W-w,nx)); ny=Math.max(0,Math.min(A0H-h,ny));
-  const n={ id:crypto.randomUUID(), board_id:boardId, x:nx, y:ny, w, h, text:"", color:selColor, shape, fontsize:7 };
+  const w = shape==="decision"?150:170, h = shape==="decision"?90:(shape==="startend"?56:70);
+  const nx=Math.round(center.x-w/2+(Math.random()*40-20)), ny=Math.round(center.y-h/2+(Math.random()*40-20));
+  const n={ id:crypto.randomUUID(), board_id:boardId, x:nx, y:ny, w, h, text:"", color:selColor, shape, fontsize:14 };
   state.nodes[n.id]=n; selection={kind:'node',id:n.id}; renderCanvas(); updateFmtUI(); saveNode(n);
   setTimeout(()=>editNodeText(n),30);
 }
@@ -865,60 +855,6 @@ function buildPalette(){
   });
 }
 
-/* ============================================================
-   A0-Blatt + A3-Kacheln + Bild-Export
-   ============================================================ */
-function renderPage(){
-  const gP=document.getElementById("page"); if(!gP) return; gP.innerHTML="";
-  const bg=document.createElementNS(SVGNS,"rect");
-  bg.setAttribute("x",0); bg.setAttribute("y",0); bg.setAttribute("width",A0W); bg.setAttribute("height",A0H);
-  bg.setAttribute("fill","#ffffff"); bg.setAttribute("stroke","#c7ccd6"); bg.setAttribute("stroke-width",1);
-  gP.appendChild(bg);
-  const tw=A0W/TILE_COLS, th=A0H/TILE_ROWS;
-  for(let r=0;r<TILE_ROWS;r++) for(let c=0;c<TILE_COLS;c++){
-    const idx=r*TILE_COLS+c, x=c*tw, y=r*th;
-    const cell=document.createElementNS(SVGNS,"rect");
-    cell.setAttribute("class","tile"+(selTile===idx?" sel":"")); cell.dataset.tile=idx;
-    cell.setAttribute("x",x); cell.setAttribute("y",y); cell.setAttribute("width",tw); cell.setAttribute("height",th);
-    cell.addEventListener("click",ev=>{ ev.stopPropagation(); selectTile(idx); });
-    gP.appendChild(cell);
-    const lbl=document.createElementNS(SVGNS,"text");
-    lbl.setAttribute("class","tile-label"); lbl.setAttribute("x",x+10); lbl.setAttribute("y",y+24);
-    lbl.textContent=t("tileWord")+" "+(idx+1); gP.appendChild(lbl);
-  }
-}
-function selectTile(idx){ selTile=(selTile===idx?null:idx); renderPage(); updateFmtUI(); }
-function boardName(){ const b=boards.find(x=>x.id===boardId); return (b?b.name:"board").replace(/[^\w\-]+/g,"_"); }
-function downloadBlob(blob,name){
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
-}
-function exportTile(){
-  if(selTile===null){ alert(t("noTile")); return; }
-  const tw=A0W/TILE_COLS, th=A0H/TILE_ROWS;
-  const c=selTile%TILE_COLS, r=Math.floor(selTile/TILE_COLS);
-  const vx=c*tw, vy=r*th;
-  const outW=Math.round(tw/25.4*EXPORT_DPI), outH=Math.round(th/25.4*EXPORT_DPI);
-  const defs=`<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/></marker>`
-    +`<marker id="arrowSel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/></marker></defs>`;
-  const edgesHTML=document.getElementById("edges").innerHTML;
-  const nodesHTML=document.getElementById("nodes").innerHTML;
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${outW}" height="${outH}" viewBox="${vx} ${vy} ${tw} ${th}">`
-    +defs+`<rect x="${vx}" y="${vy}" width="${tw}" height="${th}" fill="#ffffff"/>`
-    +`<g>${edgesHTML}</g><g>${nodesHTML}</g></svg>`;
-  const blob=new Blob([svg],{type:"image/svg+xml;charset=utf-8"});
-  const url=URL.createObjectURL(blob);
-  const img=new Image();
-  img.onload=()=>{
-    const cv=document.createElement("canvas"); cv.width=outW; cv.height=outH;
-    const ctx=cv.getContext("2d"); ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,outW,outH);
-    ctx.drawImage(img,0,0,outW,outH); URL.revokeObjectURL(url);
-    cv.toBlob(b=>{ if(b) downloadBlob(b, boardName()+"_A3-"+(selTile+1)+".png"); },"image/png");
-  };
-  img.onerror=()=>{ URL.revokeObjectURL(url); alert("Export: SVG konnte nicht gerendert werden."); };
-  img.src=url;
-}
-
 /* ---- Textformatierung (wirkt auf die gewaehlte Box) ---- */
 function fmtToggle(prop){
   if(!selection||selection.kind!=='node') return;
@@ -936,7 +872,6 @@ function updateFmtUI(){
     const b=document.getElementById(id); if(b) b.classList.toggle("active",!!(n&&n[prop]));
   });
   const fv=document.getElementById("fontVal"); if(fv) fv.textContent=n?(n.fontsize||14):"–";
-  const et=document.getElementById("exportTile"); if(et) et.classList.toggle("active",selTile!==null);
 }
 
 /* ============================================================
