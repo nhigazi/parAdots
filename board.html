@@ -64,7 +64,9 @@
   .sep{width:1px;height:24px;background:var(--line);margin:0 4px}
   .dot{width:9px;height:9px;border-radius:50%;background:#b7c0ce;display:inline-block}
   .dot.ok{background:#2fa360}.dot.sync{background:var(--accent)}.dot.err{background:#d64545}
-  .swatch{width:22px;height:22px;border-radius:6px;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+  #palette{display:flex;flex-wrap:wrap;gap:5px;max-width:232px;align-items:center}
+  .swatch{width:16px;height:16px;border-radius:5px;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+  .swatch:hover{transform:scale(1.15)}
   .swatch.sel{box-shadow:0 0 0 2px var(--accent)}
   main{flex:1;position:relative;overflow:hidden}
 
@@ -167,7 +169,7 @@
     <button id="connectBtn" data-i="connect">↳ Verbinden</button>
     <button id="delSel" data-i="delSel">Löschen</button>
     <span class="sep"></span>
-    <span id="palette" style="display:flex;gap:6px"></span>
+    <span id="palette"></span>
     <span class="sep"></span>
     <button id="fmtBold" data-title="bold"><b>F</b></button>
     <button id="fmtItalic" data-title="italic"><i>K</i></button>
@@ -325,15 +327,28 @@ function lsDel(k){ try{localStorage.removeItem(k);}catch(e){} }
 
 /* ---------------- Farben & Formen ---------------- */
 const COLORS = {
-  blue:{fill:"#e8efff",stroke:"#3b66e0",text:"#17306b"},
-  green:{fill:"#e6f7ec",stroke:"#2fa360",text:"#14532d"},
-  amber:{fill:"#fef4e2",stroke:"#d9900a",text:"#7a4b00"},
-  red:{fill:"#fdeaea",stroke:"#d64545",text:"#7a1f1f"},
-  purple:{fill:"#f1e9fe",stroke:"#8b4fe0",text:"#4a2191"},
-  teal:{fill:"#e2f6f4",stroke:"#199e92",text:"#0c4f49"},
-  gray:{fill:"#eef1f4",stroke:"#7a8694",text:"#2b3440"}
+  red:    {fill:"#fdeaea",stroke:"#dc3f3f",text:"#7a1f1f"},
+  coral:  {fill:"#fdeee6",stroke:"#e5663a",text:"#7a3415"},
+  orange: {fill:"#fef0e0",stroke:"#e07f1a",text:"#7a4600"},
+  amber:  {fill:"#fef6e0",stroke:"#d99e0a",text:"#70500a"},
+  yellow: {fill:"#fbfae0",stroke:"#bcae0d",text:"#5f5a08"},
+  lime:   {fill:"#f0f8e2",stroke:"#83b325",text:"#3f5410"},
+  green:  {fill:"#e6f7ec",stroke:"#2fa360",text:"#14532d"},
+  emerald:{fill:"#e2f6ef",stroke:"#16a37a",text:"#0c4f3a"},
+  teal:   {fill:"#e2f6f4",stroke:"#159e92",text:"#0c4f49"},
+  cyan:   {fill:"#e2f5f9",stroke:"#1197b5",text:"#0b4a59"},
+  sky:    {fill:"#e6f1fd",stroke:"#2b86e0",text:"#11406b"},
+  blue:   {fill:"#e8efff",stroke:"#3b66e0",text:"#17306b"},
+  indigo: {fill:"#ebeafe",stroke:"#5b57e0",text:"#2a2891"},
+  violet: {fill:"#f1e9fe",stroke:"#8b4fe0",text:"#4a2191"},
+  purple: {fill:"#f6e9fb",stroke:"#a93fc9",text:"#5a1f6e"},
+  magenta:{fill:"#fce7f4",stroke:"#cc3f94",text:"#701f54"},
+  pink:   {fill:"#fde8ec",stroke:"#e0456a",text:"#7a1f38"},
+  brown:  {fill:"#f3ece4",stroke:"#9c6b3f",text:"#513620"},
+  slate:  {fill:"#eceff3",stroke:"#5f7088",text:"#2b3a4d"},
+  gray:   {fill:"#eef1f4",stroke:"#7a8694",text:"#2b3440"}
 };
-const COLOR_ORDER = ["blue","green","amber","red","purple","teal","gray"];
+const COLOR_ORDER = ["red","coral","orange","amber","yellow","lime","green","emerald","teal","cyan","sky","blue","indigo","violet","purple","magenta","pink","brown","slate","gray"];
 const SVGNS = "http://www.w3.org/2000/svg";
 const TEXT_FONT="Arial, Helvetica, sans-serif";
 const _mctx=document.createElement("canvas").getContext("2d");
@@ -446,7 +461,8 @@ function applyServer(data){
   (data.nodes||[]).forEach(n=> state.nodes[n.id]=n);
   (data.edges||[]).forEach(e=> state.edges[e.id]=e);
   (data.cards||[]).forEach(c=> state.cards[c.id]=c);
-  if(boardType==="process") renderCanvas(); else renderKanban();
+  if(selection && selection.kind==='node' && !state.nodes[selection.id]) selection=null;
+  if(boardType==="process"){ renderCanvas(); updateFmtUI(); } else renderKanban();
 }
 let pollTimer=null;
 function startPolling(){
