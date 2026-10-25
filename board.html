@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>parAdots · Workboard</title>
+<title>Consultant Workboard</title>
 <!--
   parAdots Workboard — kollaboratives Prozess- & Kanban-Board.
   Geteilter Zustand in Supabase, geschuetzt durch einen Zugangskey (DB-seitig via RPC geprueft).
@@ -80,6 +80,16 @@
   .node.sel .node-shape{stroke:var(--accent);stroke-width:3}
   .rhandle{fill:var(--panel);stroke:var(--accent);stroke-width:1.5;pointer-events:all}
   #fontVal{font-size:12.5px}
+  #shapePanel{position:absolute;left:12px;top:12px;z-index:6;width:170px;background:var(--panel);
+     border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);user-select:none}
+  #shapePanelHead{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);
+     cursor:move;font-size:12.5px;font-weight:600;color:var(--muted)}
+  #shapePanelHead .grip{margin-left:auto;letter-spacing:-2px;color:var(--line);font-size:16px}
+  #shapeGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;max-height:62vh;overflow:auto}
+  .shapeBtn{display:flex;align-items:center;justify-content:center;padding:4px;border:1px solid var(--line);
+     border-radius:8px;background:var(--bg);cursor:pointer}
+  .shapeBtn:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .shapeBtn svg{display:block;width:40px;height:26px;pointer-events:none}
   .node foreignObject div{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
         text-align:center;padding:6px 8px;font-size:13px;line-height:1.25;overflow:hidden;word-break:break-word;pointer-events:none}
   .edge-path{fill:none;stroke:var(--muted);stroke-width:2}
@@ -132,7 +142,7 @@
 <!-- ============ Zugangs-Gate ============ -->
 <div id="gate">
   <div class="card">
-    <div class="logo">par<b>A</b>dots</div>
+    <div class="logo">Consultant</div>
     <div class="wordmark" style="color:var(--muted);font-weight:600" data-i="wb">Workboard</div>
     <p data-i="gateHint">Bitte Zugangskey eingeben.</p>
     <input id="gateKey" type="password" autocomplete="off" data-ph="gatePh">
@@ -146,7 +156,7 @@
 <!-- ============ App ============ -->
 <div id="app">
   <div class="topbar">
-    <span class="wordmark">par<b>A</b>dots <span style="color:var(--muted);font-weight:600" data-i="wb">Workboard</span></span>
+    <span class="wordmark">Consultant <span style="color:var(--muted);font-weight:600" data-i="wb">Workboard</span></span>
     <span class="sep"></span>
     <select id="boardSel" title="Board"></select>
     <button class="ghost" id="newBoard" data-i="newBoard">+ Board</button>
@@ -160,12 +170,6 @@
 
   <!-- Prozess-Toolbar -->
   <div class="toolbar" id="procTools">
-    <button data-shape="rect"      data-i="shRect">▭ Prozess</button>
-    <button data-shape="rounded"   data-i="shRounded">▢ Aktion</button>
-    <button data-shape="decision"  data-i="shDecision">◇ Entscheidung</button>
-    <button data-shape="startend"  data-i="shStart">⬭ Start/Ende</button>
-    <button data-shape="note"      data-i="shNote">▤ Notiz</button>
-    <span class="sep"></span>
     <button id="connectBtn" data-i="connect">↳ Verbinden</button>
     <button id="delSel" data-i="delSel">Löschen</button>
     <span class="sep"></span>
@@ -190,6 +194,10 @@
   <main>
     <!-- Prozess-Canvas -->
     <div id="canvasWrap" style="display:none">
+      <div id="shapePanel">
+        <div id="shapePanelHead">▦ <span data-i="shapesTitle">Formen</span><span class="grip">⠿</span></div>
+        <div id="shapeGrid"></div>
+      </div>
       <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -289,7 +297,8 @@ const I18N = {
       bold:"Fett",italic:"Kursiv",underline:"Unterstrichen",strike:"Durchgestrichen",upper:"Großschrift",
       fontSmaller:"Schrift kleiner",fontBigger:"Schrift größer",exportTile:"⤓ A3-Kachel als Bild",
       noTile:"Bitte zuerst eine A3-Kachel anklicken.",tileWord:"A3",
-      procHint:"Form = hinzufügen · Doppelklick = Text · Anfasser = Größe · Format-Buttons wirken auf die gewählte Box · Mausrad = Zoom"},
+      procHint:"Form = hinzufügen · Doppelklick = Text · Anfasser = Größe · Format-Buttons wirken auf die gewählte Box · Mausrad = Zoom",
+      shapesTitle:"Formen"},
   en:{wb:"Workboard",gateHint:"Please enter the access key.",gatePh:"Access key",enter:"Open",
       remember:"Remember on this device",newBoard:"+ Board",rename:"Rename",delete:"Delete",
       lock:"Lock",shRect:"▭ Process",shRounded:"▢ Action",shDecision:"◇ Decision",
@@ -307,7 +316,8 @@ const I18N = {
       bold:"Bold",italic:"Italic",underline:"Underline",strike:"Strikethrough",upper:"Uppercase",
       fontSmaller:"Smaller text",fontBigger:"Larger text",exportTile:"⤓ Save A3 tile as image",
       noTile:"Please click an A3 tile first.",tileWord:"A3",
-      procHint:"Shape = add · double-click = text · handles = resize · format buttons act on the selected box · wheel = zoom"}
+      procHint:"Shape = add · double-click = text · handles = resize · format buttons act on the selected box · wheel = zoom",
+      shapesTitle:"Shapes"}
 };
 let LANG = lsGet("wb_lang") || "de";
 function t(k){ return (I18N[LANG] && I18N[LANG][k]) || (I18N.de[k]) || k; }
@@ -316,6 +326,7 @@ function applyI18n(){
   document.querySelectorAll("[data-i]").forEach(el=>{ el.textContent = t(el.getAttribute("data-i")); });
   document.querySelectorAll("[data-ph]").forEach(el=>{ el.placeholder = t(el.getAttribute("data-ph")); });
   document.querySelectorAll("[data-title]").forEach(el=>{ el.title = t(el.getAttribute("data-title")); });
+  buildShapePanel();
   document.getElementById("langBtn").textContent = LANG==="de" ? "DE / EN" : "EN / DE";
   if(boardType==="kanban") renderKanban();
 }
@@ -349,6 +360,24 @@ const COLORS = {
   gray:   {fill:"#eef1f4",stroke:"#7a8694",text:"#2b3440"}
 };
 const COLOR_ORDER = ["red","coral","orange","amber","yellow","lime","green","emerald","teal","cyan","sky","blue","indigo","violet","purple","magenta","pink","brown","slate","gray"];
+const SHAPES=[
+  {s:"rect",de:"Rechteck",en:"Rectangle"},
+  {s:"rounded",de:"Abgerundet",en:"Rounded"},
+  {s:"startend",de:"Start/Ende",en:"Start/End"},
+  {s:"ellipse",de:"Ellipse",en:"Ellipse"},
+  {s:"circle",de:"Kreis",en:"Circle"},
+  {s:"decision",de:"Entscheidung",en:"Decision"},
+  {s:"parallelogram",de:"Daten",en:"Data"},
+  {s:"hexagon",de:"Vorbereitung",en:"Preparation"},
+  {s:"triangle",de:"Dreieck",en:"Triangle"},
+  {s:"chevron",de:"Pfeil / Schritt",en:"Arrow / Step"},
+  {s:"card",de:"Karte",en:"Card"},
+  {s:"document",de:"Dokument",en:"Document"},
+  {s:"process2",de:"Vordef. Prozess",en:"Predef. process"},
+  {s:"cylinder",de:"Datenbank",en:"Database"},
+  {s:"cloud",de:"Cloud",en:"Cloud"},
+  {s:"note",de:"Notiz",en:"Note"}
+];
 const SVGNS = "http://www.w3.org/2000/svg";
 const TEXT_FONT="Arial, Helvetica, sans-serif";
 const _mctx=document.createElement("canvas").getContext("2d");
@@ -546,25 +575,64 @@ function edgeEl(e){
   hit.addEventListener("dblclick",ev=>{ ev.stopPropagation(); editEdgeLabel(e); });
   return g;
 }
+function mkEl(tag,a){ const e=document.createElementNS(SVGNS,tag); for(const k in a) e.setAttribute(k,a[k]); return e; }
 function shapeEl(n){
   const col=COLORS[n.color]||COLORS.blue;
-  let s;
-  if(n.shape==="decision"){
-    s=document.createElementNS(SVGNS,"polygon");
-    s.setAttribute("points",`${n.w/2},0 ${n.w},${n.h/2} ${n.w/2},${n.h} 0,${n.h/2}`);
-  }else{
-    s=document.createElementNS(SVGNS,"rect");
-    s.setAttribute("width",n.w); s.setAttribute("height",n.h);
-    if(n.shape==="rounded") s.setAttribute("rx",14);
-    else if(n.shape==="startend") s.setAttribute("rx",n.h/2);
-    else s.setAttribute("rx",4);
+  const isNote=n.shape==="note";
+  const fill=isNote?"#fff9db":col.fill, stroke=isNote?"#e3c35a":col.stroke, sw=isNote?1.5:2;
+  const W=n.w, H=n.h;
+  const P=o=>Object.assign({fill,stroke,"stroke-width":sw,"class":"node-shape"},o);
+  switch(n.shape){
+    case "ellipse": case "circle":
+      return mkEl("ellipse",P({cx:W/2,cy:H/2,rx:W/2,ry:H/2}));
+    case "decision":
+      return mkEl("polygon",P({points:`${W/2},0 ${W},${H/2} ${W/2},${H} 0,${H/2}`}));
+    case "parallelogram":{ const s=Math.min(W*0.25,30);
+      return mkEl("polygon",P({points:`${s},0 ${W},0 ${W-s},${H} 0,${H}`})); }
+    case "hexagon":{ const s=Math.min(W*0.25,30);
+      return mkEl("polygon",P({points:`${s},0 ${W-s},0 ${W},${H/2} ${W-s},${H} ${s},${H} 0,${H/2}`})); }
+    case "triangle":
+      return mkEl("polygon",P({points:`${W/2},0 ${W},${H} 0,${H}`}));
+    case "chevron":{ const s=Math.min(W*0.3,26);
+      return mkEl("polygon",P({points:`0,0 ${W-s},0 ${W},${H/2} ${W-s},${H} 0,${H} ${s},${H/2}`})); }
+    case "card":{ const s=Math.min(W*0.22,22);
+      return mkEl("polygon",P({points:`${s},0 ${W},0 ${W},${H} 0,${H} 0,${s}`})); }
+    case "document":{ const wv=Math.min(H*0.2,16);
+      return mkEl("path",P({d:`M0,0 L${W},0 L${W},${H-wv} Q ${W*0.75},${H+wv} ${W*0.5},${H-wv} T 0,${H-wv} Z`})); }
+    case "cylinder":{ const g=mkEl("g",{"class":"node-shape"}); const ry=Math.min(H*0.16,14);
+      g.appendChild(mkEl("path",{d:`M0,${ry} A ${W/2} ${ry} 0 0 1 ${W},${ry} L ${W},${H-ry} A ${W/2} ${ry} 0 0 1 0,${H-ry} Z`,fill,stroke,"stroke-width":sw}));
+      g.appendChild(mkEl("path",{d:`M0,${ry} A ${W/2} ${ry} 0 0 0 ${W},${ry}`,fill:"none",stroke,"stroke-width":sw}));
+      return g; }
+    case "process2":{ const g=mkEl("g",{"class":"node-shape"}); const b=Math.min(W*0.12,14);
+      g.appendChild(mkEl("rect",{x:0,y:0,width:W,height:H,rx:3,fill,stroke,"stroke-width":sw}));
+      g.appendChild(mkEl("line",{x1:b,y1:0,x2:b,y2:H,stroke,"stroke-width":sw}));
+      g.appendChild(mkEl("line",{x1:W-b,y1:0,x2:W-b,y2:H,stroke,"stroke-width":sw}));
+      return g; }
+    case "cloud":{ const w=W,h=H;
+      const d=`M ${0.25*w} ${0.92*h} C ${0.03*w} ${0.92*h} ${0.03*w} ${0.58*h} ${0.2*w} ${0.54*h} `
+             +`C ${0.1*w} ${0.26*h} ${0.42*w} ${0.16*h} ${0.52*w} ${0.34*h} `
+             +`C ${0.62*w} ${0.12*h} ${0.95*w} ${0.18*h} ${0.84*w} ${0.5*h} `
+             +`C ${1.02*w} ${0.56*h} ${0.97*w} ${0.92*h} ${0.75*w} ${0.92*h} Z`;
+      return mkEl("path",P({d})); }
+    case "rounded": return mkEl("rect",P({width:W,height:H,rx:14}));
+    case "startend": return mkEl("rect",P({width:W,height:H,rx:H/2}));
+    default: return mkEl("rect",P({width:W,height:H,rx:4})); // rect & note
   }
-  s.setAttribute("class","node-shape");
-  s.setAttribute("fill", n.shape==="note" ? "#fff9db" : col.fill);
-  s.setAttribute("stroke", n.shape==="note" ? "#e3c35a" : col.stroke);
-  s.setAttribute("stroke-width", n.shape==="note"?1.5:2);
-  if(n.shape==="note") s.setAttribute("stroke-dasharray","1 0");
-  return s;
+}
+function shapeIcon(shape){
+  const svg=mkEl("svg",{viewBox:"0 0 44 28"});
+  const el=shapeEl({w:38,h:22,shape,color:"slate",x:0,y:0});
+  el.setAttribute("transform","translate(3 3)");
+  svg.appendChild(el); return svg;
+}
+function buildShapePanel(){
+  const grid=document.getElementById("shapeGrid"); if(!grid) return; grid.innerHTML="";
+  SHAPES.forEach(sh=>{
+    const b=document.createElement("button"); b.className="shapeBtn"; b.title=(LANG==="de"?sh.de:sh.en);
+    b.appendChild(shapeIcon(sh.s));
+    b.addEventListener("click",()=>addNode(sh.s));
+    grid.appendChild(b);
+  });
 }
 /* Text als echtes SVG (Formatierung + Export) */
 function wrapLines(str, maxW, fontCss){
@@ -779,7 +847,10 @@ function fitView(){
 function addNode(shape){
   const wrap=document.getElementById("canvasWrap").getBoundingClientRect();
   const center=screenToScene(wrap.left+wrap.width/2, wrap.top+wrap.height/2);
-  const w = shape==="decision"?150:170, h = shape==="decision"?90:(shape==="startend"?56:70);
+  const SZ={decision:[150,90],startend:[170,56],circle:[110,110],ellipse:[160,100],
+            triangle:[150,120],cylinder:[130,110],cloud:[180,110],hexagon:[170,80],
+            parallelogram:[180,70],chevron:[170,70]};
+  const [w,h]=SZ[shape]||[170,70];
   const nx=Math.round(center.x-w/2+(Math.random()*40-20)), ny=Math.round(center.y-h/2+(Math.random()*40-20));
   const n={ id:crypto.randomUUID(), board_id:boardId, x:nx, y:ny, w, h, text:"", color:selColor, shape, fontsize:14 };
   state.nodes[n.id]=n; selection={kind:'node',id:n.id}; renderCanvas(); updateFmtUI(); saveNode(n);
@@ -1048,8 +1119,31 @@ document.querySelectorAll('#bType label').forEach(l=>{
 
 function esc(s){ return (s||"").replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 
+/* Formen-Panel frei verschiebbar (schwebender Container) */
+(function dragShapePanel(){
+  const panel=document.getElementById("shapePanel"), head=document.getElementById("shapePanelHead");
+  if(!panel||!head) return;
+  let drag=false,sx,sy,ox,oy;
+  head.addEventListener("pointerdown",ev=>{
+    drag=true; sx=ev.clientX; sy=ev.clientY;
+    const r=panel.getBoundingClientRect(), pr=panel.parentElement.getBoundingClientRect();
+    ox=r.left-pr.left; oy=r.top-pr.top;
+    panel.style.right="auto"; panel.style.bottom="auto";
+    try{ head.setPointerCapture(ev.pointerId); }catch(e){}
+    ev.preventDefault();
+  });
+  head.addEventListener("pointermove",ev=>{
+    if(!drag) return;
+    const pr=panel.parentElement.getBoundingClientRect();
+    let nx=ox+(ev.clientX-sx), ny=oy+(ev.clientY-sy);
+    nx=Math.max(0,Math.min(pr.width-40,nx)); ny=Math.max(0,Math.min(pr.height-40,ny));
+    panel.style.left=nx+"px"; panel.style.top=ny+"px";
+  });
+  head.addEventListener("pointerup",()=>{ drag=false; });
+})();
+
 /* ---------------- Start ---------------- */
-applyI18n(); buildPalette(); updateConnectUI(); updateFmtUI();
+applyI18n(); buildPalette(); buildShapePanel(); updateConnectUI(); updateFmtUI();
 (function autostart(){
   const saved=lsGet("wb_key");
   if(saved){
