@@ -72,11 +72,18 @@
   #canvasWrap{position:absolute;inset:0;overflow:hidden;background:
      radial-gradient(circle at 1px 1px, rgba(120,130,150,.22) 1px, transparent 0) 0 0/22px 22px, var(--bg)}
   #canvas{width:100%;height:100%;display:block;touch-action:none;user-select:none}
-  .node-shape{cursor:grab}
-  .node.dragging .node-shape{cursor:grabbing}
-  .node.sel .node-shape{filter:drop-shadow(0 0 0 2px var(--accent))}
+  .node-shape{pointer-events:none}
+  .node-hit{cursor:grab;pointer-events:all;fill:transparent}
+  .node.dragging .node-hit{cursor:grabbing}
+  .node.sel .node-shape{stroke:var(--accent);stroke-width:3}
+  .rhandle{fill:var(--panel);stroke:var(--accent);stroke-width:1.5;pointer-events:all}
+  .tile{fill:transparent;stroke:#d7dce5;stroke-width:1;stroke-dasharray:7 7;pointer-events:all;cursor:pointer}
+  .tile:hover{fill:rgba(59,102,224,.05)}
+  .tile.sel{fill:rgba(59,102,224,.10);stroke:var(--accent);stroke-width:2.5;stroke-dasharray:none}
+  .tile-label{font-size:13px;fill:#9aa3b2;pointer-events:none;font-family:Arial,sans-serif}
+  #fontVal{font-size:12.5px}
   .node foreignObject div{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-        text-align:center;padding:6px 8px;font-size:13px;line-height:1.25;overflow:hidden;word-break:break-word}
+        text-align:center;padding:6px 8px;font-size:13px;line-height:1.25;overflow:hidden;word-break:break-word;pointer-events:none}
   .edge-path{fill:none;stroke:var(--muted);stroke-width:2}
   .edge.sel .edge-path{stroke:var(--accent);stroke-width:3}
   .edge-hit{fill:none;stroke:transparent;stroke-width:14;cursor:pointer}
@@ -165,7 +172,18 @@
     <button id="delSel" data-i="delSel">Löschen</button>
     <span class="sep"></span>
     <span id="palette" style="display:flex;gap:6px"></span>
-    <span class="hint" data-i="procHint">Form anklicken zum Hinzufügen · Doppelklick = umbenennen · Hintergrund ziehen = verschieben · Mausrad = Zoom</span>
+    <span class="sep"></span>
+    <button id="fmtBold" data-title="bold"><b>F</b></button>
+    <button id="fmtItalic" data-title="italic"><i>K</i></button>
+    <button id="fmtUnderline" data-title="underline"><u>U</u></button>
+    <button id="fmtStrike" data-title="strike"><s>S</s></button>
+    <button id="fmtUpper" data-title="upper">AA</button>
+    <button id="fontDec" data-title="fontSmaller">A−</button>
+    <span id="fontVal" style="min-width:26px;text-align:center;color:var(--muted)">14</span>
+    <button id="fontInc" data-title="fontBigger">A+</button>
+    <span class="sep"></span>
+    <button id="exportTile" data-i="exportTile">⤓ A3-Kachel als Bild</button>
+    <span class="hint" data-i="procHint"></span>
   </div>
 
   <!-- Kanban-Toolbar -->
@@ -188,6 +206,7 @@
         <g id="scene">
           <g id="edges"></g>
           <g id="nodes"></g>
+          <g id="handles"></g>
         </g>
       </svg>
       <textarea id="nodeEditor" rows="2"></textarea>
@@ -261,7 +280,7 @@ const I18N = {
       remember:"Auf diesem Gerät merken",newBoard:"+ Board",rename:"Umbenennen",delete:"Löschen",
       lock:"Sperren",shRect:"▭ Prozess",shRounded:"▢ Aktion",shDecision:"◇ Entscheidung",
       shStart:"⬭ Start/Ende",shNote:"▤ Notiz",connect:"↳ Verbinden",delSel:"Löschen",
-      procHint:"Form anklicken zum Hinzufügen · Doppelklick = umbenennen · Hintergrund ziehen = verschieben · Mausrad = Zoom",
+      procHint:"Form anklicken = hinzufügen · Doppelklick = umbenennen · Box ziehen = verschieben · Anfasser ziehen = Größe · Mausrad = Zoom",
       kanHint:"Karte anklicken zum Bearbeiten · ziehen zwischen Spalten",fit:"Einpassen",
       connectBadge:"Verbinden: Start-Element anklicken…",connectBadge2:"Verbinden: Ziel-Element anklicken (Esc = Abbruch)",
       editCard:"Karte bearbeiten",fTitle:"Titel",fDesc:"Beschreibung",fAssignee:"Zuständig",fLabel:"Label",
@@ -270,12 +289,16 @@ const I18N = {
       colBacklog:"Backlog",colInprogress:"In Arbeit",colReview:"Review",colDone:"Fertig",
       badKey:"Zugangskey ist falsch.",noBoards:"Noch kein Board — lege eins an.",
       confirmDelBoard:"Dieses Board mit allen Inhalten löschen?",promptRename:"Neuer Board-Name:",
-      newProcess:"Mein Prozess",newKanban:"Mein Kanban"},
+      newProcess:"Mein Prozess",newKanban:"Mein Kanban",
+      bold:"Fett",italic:"Kursiv",underline:"Unterstrichen",strike:"Durchgestrichen",upper:"Großschrift",
+      fontSmaller:"Schrift kleiner",fontBigger:"Schrift größer",exportTile:"⤓ A3-Kachel als Bild",
+      noTile:"Bitte zuerst eine A3-Kachel anklicken.",tileWord:"A3",
+      procHint:"Form = hinzufügen · Doppelklick = Text · Anfasser = Größe · Format-Buttons wirken auf die gewählte Box · Kachel anklicken → als Bild"},
   en:{wb:"Workboard",gateHint:"Please enter the access key.",gatePh:"Access key",enter:"Open",
       remember:"Remember on this device",newBoard:"+ Board",rename:"Rename",delete:"Delete",
       lock:"Lock",shRect:"▭ Process",shRounded:"▢ Action",shDecision:"◇ Decision",
       shStart:"⬭ Start/End",shNote:"▤ Note",connect:"↳ Connect",delSel:"Delete",
-      procHint:"Click a shape to add · double-click = rename · drag background = pan · wheel = zoom",
+      procHint:"Click a shape = add · double-click = rename · drag box = move · drag handles = resize · wheel = zoom",
       kanHint:"Click a card to edit · drag between columns",fit:"Fit",
       connectBadge:"Connect: click the start element…",connectBadge2:"Connect: click the target element (Esc = cancel)",
       editCard:"Edit card",fTitle:"Title",fDesc:"Description",fAssignee:"Assignee",fLabel:"Label",
@@ -284,7 +307,11 @@ const I18N = {
       colBacklog:"Backlog",colInprogress:"In progress",colReview:"Review",colDone:"Done",
       badKey:"Access key is incorrect.",noBoards:"No board yet — create one.",
       confirmDelBoard:"Delete this board and all its contents?",promptRename:"New board name:",
-      newProcess:"My process",newKanban:"My kanban"}
+      newProcess:"My process",newKanban:"My kanban",
+      bold:"Bold",italic:"Italic",underline:"Underline",strike:"Strikethrough",upper:"Uppercase",
+      fontSmaller:"Smaller text",fontBigger:"Larger text",exportTile:"⤓ Save A3 tile as image",
+      noTile:"Please click an A3 tile first.",tileWord:"A3",
+      procHint:"Shape = add · double-click = text · handles = resize · format buttons act on the selected box · click a tile → save as image"}
 };
 let LANG = lsGet("wb_lang") || "de";
 function t(k){ return (I18N[LANG] && I18N[LANG][k]) || (I18N.de[k]) || k; }
@@ -292,6 +319,7 @@ function applyI18n(){
   document.documentElement.lang = LANG;
   document.querySelectorAll("[data-i]").forEach(el=>{ el.textContent = t(el.getAttribute("data-i")); });
   document.querySelectorAll("[data-ph]").forEach(el=>{ el.placeholder = t(el.getAttribute("data-ph")); });
+  document.querySelectorAll("[data-title]").forEach(el=>{ el.title = t(el.getAttribute("data-title")); });
   document.getElementById("langBtn").textContent = LANG==="de" ? "DE / EN" : "EN / DE";
   if(boardType==="kanban") renderKanban();
 }
@@ -313,6 +341,10 @@ const COLORS = {
 };
 const COLOR_ORDER = ["blue","green","amber","red","purple","teal","gray"];
 const SVGNS = "http://www.w3.org/2000/svg";
+const A0W=841, A0H=1189, TILE_COLS=2, TILE_ROWS=4;   // A0 hoch (mm), 8 A3-Kacheln (quer)
+const TEXT_FONT="Arial, Helvetica, sans-serif";
+const EXPORT_DPI=150;
+const _mctx=document.createElement("canvas").getContext("2d");
 
 /* ---------------- State ---------------- */
 let sb = null;
@@ -328,6 +360,7 @@ let view = { tx:80, ty:60, scale:1 };
 let busy = false;              // true waehrend Interaktion -> Poll pausiert
 let lastWrite = 0, lastSig = "";
 let editingCardId = null;
+let selTile = null;            // ausgewaehlte A3-Kachel (Index) fuer Bild-Export
 
 /* ============================================================
    Supabase-RPC
@@ -397,7 +430,7 @@ async function selectBoard(id){
   document.getElementById("kanTools").style.display  = boardType==="kanban"?"flex":"none";
   document.getElementById("canvasWrap").style.display= boardType==="process"?"block":"none";
   document.getElementById("kanban").style.display    = boardType==="kanban"?"flex":"none";
-  selection=null; connectMode=false; connectSource=null; updateConnectUI();
+  selection=null; selTile=null; connectMode=false; connectSource=null; updateConnectUI();
   await reload(true);
 }
 function renderEmpty(){
@@ -449,10 +482,12 @@ function sceneTransform(){ document.getElementById("scene").setAttribute("transf
 
 function renderCanvas(){
   sceneTransform();
+  renderPage();
   const gN=document.getElementById("nodes"), gE=document.getElementById("edges");
   gN.innerHTML=""; gE.innerHTML="";
   Object.values(state.edges).forEach(e=> gE.appendChild(edgeEl(e)));
   Object.values(state.nodes).forEach(n=> gN.appendChild(nodeEl(n)));
+  renderHandles();
 }
 function nodeCenter(n){ return { x:n.x+n.w/2, y:n.y+n.h/2 }; }
 function borderPoint(n, toward){
@@ -462,24 +497,43 @@ function borderPoint(n, toward){
   const tt=1/Math.max(Math.abs(dx)/hw, Math.abs(dy)/hh);
   return { x:c.x+dx*tt, y:c.y+dy*tt };
 }
-function edgeEl(e){
+function edgeGeometry(e){
   const a=state.nodes[e.source_id], b=state.nodes[e.target_id];
-  const g=document.createElementNS(SVGNS,"g"); g.setAttribute("class","edge"+(isSel('edge',e.id)?" sel":"")); g.dataset.id=e.id;
-  if(!a||!b) return g;
+  if(!a||!b) return null;
   const p1=borderPoint(a,nodeCenter(b)), p2=borderPoint(b,nodeCenter(a));
-  const d=`M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`;
-  const hit=document.createElementNS(SVGNS,"path"); hit.setAttribute("class","edge-hit"); hit.setAttribute("d",d);
-  const path=document.createElementNS(SVGNS,"path"); path.setAttribute("class","edge-path"); path.setAttribute("d",d);
+  // Wie viele Verbindungen bestehen zwischen diesem Paar (ungerichtet)?
+  const pairId=[e.source_id,e.target_id].slice().sort().join("|");
+  const peers=Object.values(state.edges).filter(x=>[x.source_id,x.target_id].slice().sort().join("|")===pairId);
+  if(peers.length<=1){
+    return { d:`M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`, mid:{x:(p1.x+p2.x)/2,y:(p1.y+p2.y)/2} };
+  }
+  // Mehrere Kanten -> biege jede nach rechts IHRER Richtung => Gegenrichtungen trennen sich
+  const dx=p2.x-p1.x, dy=p2.y-p1.y, len=Math.hypot(dx,dy)||1;
+  const rx=dy/len, ry=-dx/len;
+  const idx=Math.max(0,peers.findIndex(x=>x.id===e.id));
+  const off=24+20*Math.floor(idx/2);
+  const cx=(p1.x+p2.x)/2 + rx*off, cy=(p1.y+p2.y)/2 + ry*off;
+  const mid={x:0.25*p1.x+0.5*cx+0.25*p2.x, y:0.25*p1.y+0.5*cy+0.25*p2.y};
+  return { d:`M ${p1.x} ${p1.y} Q ${cx} ${cy} ${p2.x} ${p2.y}`, mid };
+}
+function edgeEl(e){
+  const g=document.createElementNS(SVGNS,"g");
+  g.setAttribute("class","edge"+(isSel('edge',e.id)?" sel":"")); g.dataset.id=e.id;
+  const geo=edgeGeometry(e); if(!geo) return g;
+  const hit=document.createElementNS(SVGNS,"path"); hit.setAttribute("class","edge-hit"); hit.setAttribute("d",geo.d);
+  hit.setAttribute("fill","none"); hit.setAttribute("stroke","transparent"); hit.setAttribute("stroke-width","14");
+  const path=document.createElementNS(SVGNS,"path"); path.setAttribute("class","edge-path"); path.setAttribute("d",geo.d);
+  path.setAttribute("fill","none"); path.setAttribute("stroke","#6b7686"); path.setAttribute("stroke-width","2");
   path.setAttribute("marker-end", isSel('edge',e.id)?"url(#arrowSel)":"url(#arrow)");
   g.appendChild(hit); g.appendChild(path);
   if(e.label){
-    const mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2;
-    const bg=document.createElementNS(SVGNS,"rect");
     const tw=e.label.length*6.6+8;
-    bg.setAttribute("x",mx-tw/2); bg.setAttribute("y",my-10); bg.setAttribute("width",tw); bg.setAttribute("height",18);
-    bg.setAttribute("rx",5); bg.setAttribute("fill","var(--panel)"); bg.setAttribute("stroke","var(--line)");
+    const bg=document.createElementNS(SVGNS,"rect");
+    bg.setAttribute("x",geo.mid.x-tw/2); bg.setAttribute("y",geo.mid.y-10); bg.setAttribute("width",tw); bg.setAttribute("height",18);
+    bg.setAttribute("rx",5); bg.setAttribute("fill","#ffffff"); bg.setAttribute("stroke","#d7dce5");
     const tx=document.createElementNS(SVGNS,"text"); tx.setAttribute("class","edge-label");
-    tx.setAttribute("x",mx); tx.setAttribute("y",my+4); tx.setAttribute("text-anchor","middle"); tx.textContent=e.label;
+    tx.setAttribute("fill","#1b2430"); tx.setAttribute("font-family",TEXT_FONT); tx.setAttribute("font-size","12");
+    tx.setAttribute("x",geo.mid.x); tx.setAttribute("y",geo.mid.y+4); tx.setAttribute("text-anchor","middle"); tx.textContent=e.label;
     g.appendChild(bg); g.appendChild(tx);
   }
   hit.addEventListener("click",ev=>{ ev.stopPropagation(); select('edge',e.id); });
@@ -506,17 +560,56 @@ function shapeEl(n){
   if(n.shape==="note") s.setAttribute("stroke-dasharray","1 0");
   return s;
 }
+/* Text als echtes SVG (Formatierung + Export) */
+function wrapLines(str, maxW, fontCss){
+  _mctx.font=fontCss; const out=[];
+  (str.split("\n")).forEach(para=>{
+    const words=para.split(/\s+/).filter(Boolean);
+    if(!words.length){ out.push(""); return; }
+    let line=words[0];
+    for(let i=1;i<words.length;i++){
+      const test=line+" "+words[i];
+      if(_mctx.measureText(test).width<=maxW) line=test; else { out.push(line); line=words[i]; }
+    }
+    out.push(line);
+  });
+  return out;
+}
+function textEl(n){
+  let str=(n.text||""); if(!str) return null;
+  if(n.upper) str=str.toUpperCase();
+  const fs=n.fontsize||14, pad=8;
+  const fontCss=`${n.italic?'italic':'normal'} ${n.bold?'bold':'normal'} ${fs}px ${TEXT_FONT}`;
+  const lines=wrapLines(str, Math.max(10,n.w-2*pad), fontCss);
+  const lh=fs*1.25;
+  const t=document.createElementNS(SVGNS,"text");
+  t.setAttribute("text-anchor","middle"); t.setAttribute("font-family",TEXT_FONT); t.setAttribute("font-size",fs);
+  t.setAttribute("font-weight", n.bold?"bold":"normal"); t.setAttribute("font-style", n.italic?"italic":"normal");
+  const deco=[]; if(n.underline)deco.push("underline"); if(n.strike)deco.push("line-through");
+  if(deco.length) t.setAttribute("text-decoration", deco.join(" "));
+  t.setAttribute("fill", n.shape==="note"?"#5a4a10":(COLORS[n.color]||COLORS.blue).text);
+  t.style.pointerEvents="none";
+  const startY=n.h/2 - (lines.length-1)*lh/2;
+  lines.forEach((ln,i)=>{
+    const ts=document.createElementNS(SVGNS,"tspan");
+    ts.setAttribute("x",n.w/2); ts.setAttribute("y",startY+i*lh); ts.setAttribute("dominant-baseline","middle");
+    ts.textContent=ln; t.appendChild(ts);
+  });
+  return t;
+}
 function nodeEl(n){
-  const col=COLORS[n.color]||COLORS.blue;
   const g=document.createElementNS(SVGNS,"g");
   g.setAttribute("class","node"+(isSel('node',n.id)?" sel":"")); g.dataset.id=n.id;
   g.setAttribute("transform",`translate(${n.x} ${n.y})`);
   g.appendChild(shapeEl(n));
-  const fo=document.createElementNS(SVGNS,"foreignObject");
-  fo.setAttribute("x",0); fo.setAttribute("y",0); fo.setAttribute("width",n.w); fo.setAttribute("height",n.h);
-  const div=document.createElement("div"); div.style.color=(n.shape==="note")?"#5a4a10":col.text;
-  div.textContent=n.text||""; fo.appendChild(div); g.appendChild(fo);
-  attachNodeHandlers(g,n);
+  const label=textEl(n); if(label) g.appendChild(label);
+  // Transparenter Hit-Layer ganz oben -> ganze Box ist Greifflaeche + Hand-Cursor
+  const hit=document.createElementNS(SVGNS,"rect");
+  hit.setAttribute("class","node-hit"); hit.setAttribute("fill","transparent");
+  hit.setAttribute("x",0); hit.setAttribute("y",0);
+  hit.setAttribute("width",n.w); hit.setAttribute("height",n.h); hit.setAttribute("rx",8);
+  g.appendChild(hit);
+  attachNodeHandlers(g,hit,n);
   return g;
 }
 
@@ -525,37 +618,34 @@ function screenToScene(clientX,clientY){
   const r=document.getElementById("canvasWrap").getBoundingClientRect();
   return { x:(clientX-r.left-view.tx)/view.scale, y:(clientY-r.top-view.ty)/view.scale };
 }
-function attachNodeHandlers(g,n){
-  const shape=g.querySelector(".node-shape"), fo=g.querySelector("foreignObject");
+function attachNodeHandlers(g,hit,n){
   let moved=false, start=null, orig=null;
-  function down(ev){
-    if(connectMode){ ev.stopPropagation(); handleConnectClick(n); return; }
+  hit.addEventListener("pointerdown",ev=>{
     if(ev.button!==0) return;
-    ev.stopPropagation();
-    select('node',n.id);
+    if(connectMode){ ev.stopPropagation(); handleConnectClick(n); return; }
+    ev.stopPropagation(); ev.preventDefault();
+    select('node',n.id);                 // nur Auswahl-Klasse, KEIN Neuzeichnen
     busy=true; moved=false;
     start=screenToScene(ev.clientX,ev.clientY); orig={x:n.x,y:n.y};
     g.classList.add("dragging");
-    g.setPointerCapture && g.setPointerCapture(ev.pointerId);
-    g.addEventListener("pointermove",move);
-    g.addEventListener("pointerup",up);
-  }
-  function move(ev){
-    const p=screenToScene(ev.clientX,ev.clientY);
-    const nx=orig.x+(p.x-start.x), ny=orig.y+(p.y-start.y);
-    if(Math.abs(nx-orig.x)+Math.abs(ny-orig.y)>2) moved=true;
-    n.x=nx; n.y=ny; g.setAttribute("transform",`translate(${nx} ${ny})`);
-    updateEdgesFor(n.id);
-  }
-  function up(ev){
-    g.classList.remove("dragging");
-    g.removeEventListener("pointermove",move); g.removeEventListener("pointerup",up);
-    busy=false;
-    if(moved){ saveNode(n); }
-  }
-  shape.addEventListener("pointerdown",down);
-  fo.addEventListener("pointerdown",down);
-  g.addEventListener("dblclick",ev=>{ ev.stopPropagation(); if(!connectMode) editNodeText(n); });
+    try{ hit.setPointerCapture(ev.pointerId); }catch(e){}
+    const move=(e2)=>{
+      const p=screenToScene(e2.clientX,e2.clientY);
+      let nx=orig.x+(p.x-start.x), ny=orig.y+(p.y-start.y);
+      if(Math.abs(nx-orig.x)+Math.abs(ny-orig.y)>2) moved=true;
+      nx=Math.max(0,Math.min(A0W-n.w,nx)); ny=Math.max(0,Math.min(A0H-n.h,ny));
+      n.x=nx; n.y=ny; g.setAttribute("transform",`translate(${nx} ${ny})`);
+      updateEdgesFor(n.id); repositionHandles(n);
+    };
+    const up=()=>{
+      hit.removeEventListener("pointermove",move); hit.removeEventListener("pointerup",up);
+      g.classList.remove("dragging"); busy=false;
+      if(moved) saveNode(n);
+    };
+    hit.addEventListener("pointermove",move);
+    hit.addEventListener("pointerup",up);
+  });
+  hit.addEventListener("dblclick",ev=>{ ev.stopPropagation(); if(!connectMode) editNodeText(n); });
 }
 function updateEdgesFor(nodeId){
   document.querySelectorAll("#edges .edge").forEach(g=>{
@@ -565,9 +655,83 @@ function updateEdgesFor(nodeId){
     }
   });
 }
+
+/* ---- Groesse aendern (Anfasser an Ecken/Raendern) ---- */
+const MINW=60, MINH=36, HANDLE=10;
+const HANDLE_DIRS=["nw","n","ne","e","se","s","sw","w"];
+const HCURSOR={nw:"nwse-resize",se:"nwse-resize",ne:"nesw-resize",sw:"nesw-resize",n:"ns-resize",s:"ns-resize",e:"ew-resize",w:"ew-resize"};
+function handleCenter(dir,n){
+  const L=n.x,R=n.x+n.w,T=n.y,B=n.y+n.h,MX=n.x+n.w/2,MY=n.y+n.h/2;
+  return ({nw:[L,T],n:[MX,T],ne:[R,T],e:[R,MY],se:[R,B],s:[MX,B],sw:[L,B],w:[L,MY]})[dir];
+}
+function placeHandle(h,dir,n,s){
+  const c=handleCenter(dir,n);
+  h.setAttribute("width",s); h.setAttribute("height",s);
+  h.setAttribute("x",c[0]-s/2); h.setAttribute("y",c[1]-s/2); h.setAttribute("rx",2);
+}
+function renderHandles(){
+  const gH=document.getElementById("handles"); if(!gH) return;
+  gH.innerHTML="";
+  if(boardType!=="process"||!selection||selection.kind!=="node") return;
+  const n=state.nodes[selection.id]; if(!n) return;
+  const s=HANDLE/view.scale;
+  HANDLE_DIRS.forEach(dir=>{
+    const h=document.createElementNS(SVGNS,"rect");
+    h.setAttribute("class","rhandle"); h.dataset.dir=dir; h.style.cursor=HCURSOR[dir];
+    placeHandle(h,dir,n,s); attachResize(h,dir,n); gH.appendChild(h);
+  });
+}
+function repositionHandles(n){
+  const s=HANDLE/view.scale;
+  document.querySelectorAll("#handles .rhandle").forEach(h=> placeHandle(h,h.dataset.dir,n,s));
+}
+function rebuildNode(n){
+  const old=document.querySelector('#nodes .node[data-id="'+n.id+'"]');
+  if(old) old.replaceWith(nodeEl(n));
+}
+function applyResize(dir,orig,ddx,ddy,n){
+  let x=orig.x,y=orig.y,w=orig.w,h=orig.h;
+  if(dir.indexOf("e")>=0) w=orig.w+ddx;
+  if(dir.indexOf("s")>=0) h=orig.h+ddy;
+  if(dir.indexOf("w")>=0){ w=orig.w-ddx; x=orig.x+ddx; }
+  if(dir.indexOf("n")>=0){ h=orig.h-ddy; y=orig.y+ddy; }
+  if(w<MINW){ if(dir.indexOf("w")>=0) x=orig.x+orig.w-MINW; w=MINW; }
+  if(h<MINH){ if(dir.indexOf("n")>=0) y=orig.y+orig.h-MINH; h=MINH; }
+  w=Math.min(w,A0W); h=Math.min(h,A0H);
+  x=Math.max(0,Math.min(A0W-w,x)); y=Math.max(0,Math.min(A0H-h,y));
+  n.x=x; n.y=y; n.w=w; n.h=h;
+}
+function attachResize(h,dir,n){
+  h.addEventListener("pointerdown",ev=>{
+    if(ev.button!==0) return;
+    ev.stopPropagation(); ev.preventDefault();
+    busy=true;
+    const orig={x:n.x,y:n.y,w:n.w,h:n.h};
+    const start=screenToScene(ev.clientX,ev.clientY);
+    try{ h.setPointerCapture(ev.pointerId); }catch(e){}
+    const move=(e2)=>{
+      const p=screenToScene(e2.clientX,e2.clientY);
+      applyResize(dir,orig,p.x-start.x,p.y-start.y,n);
+      rebuildNode(n); repositionHandles(n); updateEdgesFor(n.id);
+    };
+    const up=()=>{
+      h.removeEventListener("pointermove",move); h.removeEventListener("pointerup",up);
+      busy=false; saveNode(n);
+    };
+    h.addEventListener("pointermove",move); h.addEventListener("pointerup",up);
+  });
+}
 function isSel(kind,id){ return selection && selection.kind===kind && selection.id===id; }
-function select(kind,id){ selection={kind,id}; if(boardType==="process") renderCanvas(); }
-function clearSelection(){ selection=null; if(boardType==="process") renderCanvas(); }
+function refreshSelection(){
+  document.querySelectorAll("#nodes .node").forEach(g=> g.classList.toggle("sel", isSel('node',g.dataset.id)));
+  document.querySelectorAll("#edges .edge").forEach(g=>{
+    const s=isSel('edge',g.dataset.id); g.classList.toggle("sel",s);
+    const p=g.querySelector(".edge-path"); if(p) p.setAttribute("marker-end", s?"url(#arrowSel)":"url(#arrow)");
+  });
+  renderHandles(); updateFmtUI();
+}
+function select(kind,id){ selection={kind,id}; if(boardType==="process") refreshSelection(); }
+function clearSelection(){ selection=null; if(boardType==="process") refreshSelection(); }
 
 /* Pan + Zoom + Hintergrund-Klick */
 (function canvasBg(){
@@ -575,7 +739,7 @@ function clearSelection(){ selection=null; if(boardType==="process") renderCanva
   let panning=false,sx,sy,otx,oty;
   wrap.addEventListener("pointerdown",ev=>{
     if(ev.target.closest(".node")||ev.target.closest(".edge")) return;
-    if(connectMode){ return; }
+    if(connectMode){ if(connectSource){ connectSource=null; updateConnectUI(); } return; }
     panning=true; busy=true; sx=ev.clientX; sy=ev.clientY; otx=view.tx; oty=view.ty;
     wrap.setPointerCapture(ev.pointerId); clearSelection();
   });
@@ -589,20 +753,16 @@ function clearSelection(){ selection=null; if(boardType==="process") renderCanva
     const factor=ev.deltaY<0?1.1:1/1.1;
     const ns=Math.min(2.5,Math.max(0.25,view.scale*factor));
     const wx=(cx-view.tx)/view.scale, wy=(cy-view.ty)/view.scale;
-    view.scale=ns; view.tx=cx-wx*ns; view.ty=cy-wy*ns; sceneTransform();
+    view.scale=ns; view.tx=cx-wx*ns; view.ty=cy-wy*ns; sceneTransform(); renderHandles();
   },{passive:false});
 })();
 function fitView(){
-  const ns=Object.values(state.nodes); const wrap=document.getElementById("canvasWrap").getBoundingClientRect();
-  if(!ns.length){ view={tx:80,ty:60,scale:1}; sceneTransform(); return; }
-  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
-  ns.forEach(n=>{ minx=Math.min(minx,n.x);miny=Math.min(miny,n.y);maxx=Math.max(maxx,n.x+n.w);maxy=Math.max(maxy,n.y+n.h);});
-  const bw=maxx-minx||1,bh=maxy-miny||1;
-  const s=Math.min(wrap.width/(bw+120), wrap.height/(bh+120), 1.4);
-  view.scale=Math.max(0.25,s);
-  view.tx=(wrap.width-bw*view.scale)/2 - minx*view.scale;
-  view.ty=(wrap.height-bh*view.scale)/2 - miny*view.scale;
-  sceneTransform();
+  const wrap=document.getElementById("canvasWrap").getBoundingClientRect();
+  const s=Math.min(wrap.width/(A0W+80), wrap.height/(A0H+80));
+  view.scale=Math.max(0.05,s);
+  view.tx=(wrap.width-A0W*view.scale)/2;
+  view.ty=(wrap.height-A0H*view.scale)/2;
+  sceneTransform(); renderHandles();
 }
 
 /* Knoten hinzufuegen */
@@ -676,9 +836,11 @@ function updateConnectUI(){
 function toggleConnect(){ connectMode=!connectMode; connectSource=null; updateConnectUI(); }
 function handleConnectClick(n){
   if(!connectSource){ connectSource=n.id; updateConnectUI(); select('node',n.id); return; }
-  if(connectSource===n.id){ return; }
+  if(connectSource===n.id){ connectSource=null; updateConnectUI(); return; }  // Abwahl
   const e={ id:crypto.randomUUID(), board_id:boardId, source_id:connectSource, target_id:n.id, label:"" };
-  state.edges[e.id]=e; connectSource=null; connectMode=false; updateConnectUI(); renderCanvas(); saveEdge(e);
+  state.edges[e.id]=e;
+  connectSource=null;               // Verbinden-Modus bleibt AN -> mehrere/gegenlaeufige Verbindungen
+  updateConnectUI(); renderCanvas(); saveEdge(e);
 }
 
 /* Palette */
@@ -812,8 +974,8 @@ document.getElementById("connectBtn").addEventListener("click",toggleConnect);
 document.getElementById("delSel").addEventListener("click",()=>{
   if(!selection) return; if(selection.kind==='node') deleteNode(selection.id); else deleteEdge(selection.id);
 });
-document.getElementById("zIn").addEventListener("click",()=>{ view.scale=Math.min(2.5,view.scale*1.15); sceneTransform(); });
-document.getElementById("zOut").addEventListener("click",()=>{ view.scale=Math.max(0.25,view.scale/1.15); sceneTransform(); });
+document.getElementById("zIn").addEventListener("click",()=>{ view.scale=Math.min(2.5,view.scale*1.15); sceneTransform(); renderHandles(); });
+document.getElementById("zOut").addEventListener("click",()=>{ view.scale=Math.max(0.25,view.scale/1.15); sceneTransform(); renderHandles(); });
 document.getElementById("zFit").addEventListener("click",fitView);
 
 document.addEventListener("keydown",e=>{
